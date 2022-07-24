@@ -17,6 +17,6 @@ urlpatterns = [
     # Refresh token
     re_path(r"token/refresh$", CustomRefreshToken.as_view(), name='token_refresh'),
     # Account confirm
-    re_path(r"^sign-up/pin$", CustomSignupPinView.as_view(), name="custom_signup_pin"),
+    re_path(r"^get-pin$", CustomSignupPinView.as_view(), name="custom_signup_pin"),
     re_path(r"^sign-up$", CustomSignupView.as_view(), name="custom_signup"),
 ]

@@ -2,10 +2,21 @@ from django.db import IntegrityError
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from api.errors import ERROR_INVALID_PIN
+from api.errors import (
+    ERROR_INVALID_PIN,
+    ERROR_USER_NOT_FOUND,
+    PIN_EXPIRED,
+    PIN_NOT_EXISTS
+)
 from core.constants import RoleName
 from core.decorators import map_exceptions
-from core.exceptions import InvalidPin, RoleNotFound
+from core.exceptions import (
+    InvalidPin,
+    RoleNotFound,
+    UserNotFound,
+    PinNotExists,
+    PinExpired
+)
 from core.models import User, Role, UserRole
 from core.users.handler import UserHandler
 from utils import error
@@ -25,6 +36,9 @@ class CustomizeTokenObtainPairPatchedSerializer(TokenObtainPairSerializer):
     @map_exceptions(
         {
             InvalidPin: ERROR_INVALID_PIN,
+            UserNotFound: ERROR_USER_NOT_FOUND,
+            PinNotExists: PIN_NOT_EXISTS,
+            PinExpired: PIN_EXPIRED
         }
     )
     def validate(self, request_data):

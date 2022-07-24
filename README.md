@@ -22,12 +22,19 @@
 
 * `$ docker-compose -f docker/docker-compose.yml exec backend python manage.py loaddata seed/0001_Role.json`
 
+## Process signup and login
+
+- call `api/auth/get-pin` to generate pin and get token for validate pin
+- after that, call `api/auth/sign-up`  to sign up or `api/auth/login` to login
+
 ### Git
+
 - `$ ssh-keygen`
 - `$ eval 'ssh-agent -s'`
 - `$ ssh-add ~/.ssh/id_rsa`
 - `$ cat ~/.ssh/id_rsa.pub`
 
-### acc git 
+### acc git
+
 - `giaphiendev`
-- `hien0388423***`
+- `h***0388******`

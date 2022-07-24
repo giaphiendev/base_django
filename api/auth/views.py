@@ -13,6 +13,8 @@ from core.models import UserPin
 from core.users.handler import UserHandler
 from custom_service.task import send_email_from_celery
 
+from django.conf import settings
+
 
 class LoginView(TokenObtainPairView):
     permission_classes = (AllowAny,)
@@ -41,8 +43,14 @@ class CustomSignupPinView(APIView):
 
     def get(self, request):
         pin = UserPin().generate_pin_sign_up()
-        send_email_from_celery.delay(pin.code)
-        response = {"result": "success", "payload": {"token": str(pin.device_token)}, "errors": None}
+        # send_email_from_celery.delay(pin.code)
+        response = {
+            "result": "success",
+            "payload": {"token": str(pin.device_token)},
+            "errors": None
+        }
+        if settings.DEBUG:
+            response['pin'] = pin.code
         return Response(response, status=200)
 
 

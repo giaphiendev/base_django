@@ -2,7 +2,6 @@ import math
 from django.conf import settings
 from django.core.paginator import InvalidPage
 from rest_framework import pagination
-from rest_framework.response import Response
 from utils.error import PageNotFound
 
 
@@ -10,23 +9,30 @@ class PageNumberPagination(pagination.PageNumberPagination):
     page_size = settings.DEFAULT_PAGINATION_PAGE_SIZE
     page_size_query_param = 'limit'
 
+    def previous_page_number(self):
+        try:
+            return self.page.previous_page_number()
+        except:
+            return None
+
+    def next_page_number(self):
+        try:
+            return self.page.next_page_number()
+        except:
+            return None
+
     def get_paginated_response(self, data):
         per_page = self.page.paginator.per_page
         count = self.page.paginator.count
         total_page = math.ceil(count / per_page)
-        return Response({
-            'page_info': {
-                'current_page': self.page.number,
-                'prev_page': self.get_previous_link(),
-                'next_page': self.get_next_link(),
-                'per_page': self.page.paginator.per_page,
-                'total_page': total_page,
-                'total': self.page.paginator.count,
-            },
-            'payload': data,
-            "error": None,
-            "success": True,
-        })
+        return {
+            'page': self.page.number,
+            'prev_page': self.previous_page_number(),
+            'next_page': self.next_page_number(),
+            'limit': self.page.paginator.per_page,
+            'total_page': total_page,
+            'total': self.page.paginator.count,
+        }
 
     def paginate_queryset(self, queryset, request, view=None):
         """

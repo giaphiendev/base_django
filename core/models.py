@@ -75,7 +75,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, TimeStampMixin):
     first_name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255, blank=True, null=True)
-    username = models.CharField(max_length=255, blank=True, null=True)
+    username = models.CharField(max_length=255, blank=True, null=True, unique=True)
     email = models.EmailField(max_length=200, blank=True, null=True, unique=True)
     phone = models.CharField(max_length=255, blank=True, null=True, validators=[validate_phone_number])
     avatar_url = models.CharField(max_length=255, blank=True, null=True)

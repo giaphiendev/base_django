@@ -287,23 +287,48 @@ class UserHandler:
         Check user and pin for login function
         """
         try:
-            UserPin.objects.get(
+            pin = UserPin.objects.get(
                 code=data.get("pin", ""),
                 device_token=data.get("token", "")
             )
+            if pin.pin_expired < datetime.now():
+                raise PinExpired('Pin expired')
             user = User.objects.get(
                 email=data.get("email", ""),
-                user__code=data.get("pin", ""),
-                user__pin_expired__gte=datetime.utcnow(),
-                user__device_token=data.get("token", ""),
+                # user__code=data.get("pin", ""),
+                # user__pin_expired__gte=datetime.utcnow(),
+                # user__device_token=data.get("token", ""),
             )
             user.last_accessed_at = datetime.utcnow()
             user.save()
         except User.DoesNotExist:
-            raise PinExpired('Pin expired')
+            raise UserNotFound('User Not Found')
         except UserPin.DoesNotExist:
             raise PinNotExists('Pin not exists')
         UserPin.objects.get(code=data.get("pin", "")).delete()
+        return user
+
+    def get_user_by_password(self, data):
+        """
+        Check user and password for login function
+
+        :param data: {
+            email: '',
+            password: ''
+        }
+
+        : return user
+        """
+        try:
+            user = User.objects.get(
+                email=data.get("email", "")
+            )
+            if not user.check_password(data.get("password", "")):
+                raise InvalidPassword("The provided password is incorrect.")
+            user.last_accessed_at = datetime.utcnow()
+            user.save()
+        except User.DoesNotExist:
+            raise UserNotFound('User Not Found')
         return user
 
     def get_pin(self, data, delete_pin=True):
@@ -313,8 +338,6 @@ class UserHandler:
         try:
             pin = UserPin.objects.get(code=data.get("pin", ""),
                                       device_token=data.get("token", ""))
-            print(f'datetime.now(); {datetime.now()}')
-            print(f'pin_expired {pin.pin_expired}')
 
             if pin.pin_expired < datetime.now():
                 raise PinExpired('Pin expired')

@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('first_name', models.CharField(blank=True, max_length=255, null=True)),
                 ('last_name', models.CharField(blank=True, max_length=255, null=True)),
-                ('username', models.CharField(blank=True, max_length=255, null=True)),
+                ('username', models.CharField(blank=True, max_length=255, null=True, unique=True)),
                 ('email', models.EmailField(blank=True, max_length=200, null=True, unique=True)),
                 ('phone', models.CharField(blank=True, max_length=255, null=True, validators=[utils.validators.validate_phone_number])),
                 ('avatar_url', models.CharField(blank=True, max_length=255, null=True)),

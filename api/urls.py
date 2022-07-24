@@ -1,11 +1,13 @@
 from django.urls import path, include
 # from drf_spectacular.views import SpectacularJSONAPIView, SpectacularRedocView
-from .webhooks import urls as webhook_urls
-from .auth import urls as auth_urls
-from .user import urls as user_urls
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+
+from .webhooks import urls as webhook_urls
+from .auth import urls as auth_urls
+from .user import urls as user_urls
+from .post import urls as post_urls
 
 app_name = "api"
 
@@ -40,5 +42,7 @@ urlpatterns = (
         # my url
         path("auth/", include(auth_urls, namespace="auth")),
         path("user/", include(user_urls, namespace="user")),
+        # demo api for post model
+        path("posts/", include(post_urls, namespace="post")),
     ]
 )

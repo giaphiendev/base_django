@@ -149,23 +149,23 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR.parent / 'db.sqlite3',
-    }
-}
-
 # DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": os.getenv("DATABASE_NAME", "base_django"),
-#         "USER": os.getenv("DATABASE_USER", "base_django"),
-#         "PASSWORD": os.getenv("DATABASE_PASSWORD", "wl4%50md"),
-#         "HOST": os.getenv("DATABASE_HOST", "db"),
-#         "PORT": os.getenv("DATABASE_PORT", "5432"),
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR.parent / 'db.sqlite3',
 #     }
 # }
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.getenv("DATABASE_NAME", "techwiz"),
+        "USER": os.getenv("DATABASE_USER", "admin"),
+        "PASSWORD": os.getenv("DATABASE_PASSWORD", "admin@123"),
+        "HOST": os.getenv("DATABASE_HOST", "techwiz_mysql"),
+        "PORT": os.getenv("DATABASE_PORT", "3306"),
+    }
+}
 
 USER_TABLE_DATABASE = "default"
 
@@ -329,16 +329,15 @@ EMAIL_BACKEND = "djcelery_email.backends.CeleryEmailBackend"
 
 if os.getenv("EMAIL_SMTP", ""):
     CELERY_EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-    EMAIL_BACKEND = "django_smtp_ssl.SSLEmailBackend"
-    # EMAIL_SMTP_USE_TLS OR EMAIL_SMTP_USE_TLS for backwards compatibility after
+    EMAIL_BACKEND = "django_smtp_ssl.SSLEmailBackend"  # 'django.core.mail.backends.smtp.EmailBackend'
+    # EMAIL_SMTP_USE_TLS for backwards compatibility after
     # fixing #448.
-    EMAIL_USE_TLS = bool(os.getenv("EMAIL_SMTP_USE_TLS", "")) or bool(
-        os.getenv("EMAIL_SMPT_USE_TLS", "")
-    )
+    EMAIL_USE_TLS = True
     EMAIL_HOST = os.getenv("EMAIL_SMTP_HOST", "smtp.gmail.com")
     EMAIL_PORT = os.getenv("EMAIL_SMTP_PORT", "587")
-    EMAIL_HOST_USER = os.getenv("EMAIL_SMTP_USER", "")
-    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_SMTP_PASSWORD", "")
+    EMAIL_HOST_USER = os.getenv("EMAIL_SMTP_USER", '')
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_SMTP_PASSWORD", "jklteovxvfwkkkpv")
+
 else:
     CELERY_EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
