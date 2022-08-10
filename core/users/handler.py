@@ -28,7 +28,7 @@ from core.exceptions import (
 )
 from core.models import (
     UserPin,
-    UserRole,
+    # UserRole,
 )
 
 from core.exceptions import (
@@ -369,23 +369,23 @@ class UserHandler:
         except TokenError:
             raise ERROR_INVALID_TOKEN("The token is invalid")
 
-    def delete_user(self, user_id):
-        try:
-            manage_role = [
-                RoleName.SUPER_ADMIN,
-                RoleName.STAFF,
-                RoleName.ADMIN,
-                RoleName.DEVELOP,
-            ]
-            user = UserRole.objects.get(
-                user__id=user_id,
-                role__name__in=manage_role,
-                deleted_at=None,
-            )
-            user.deleted_at = datetime.utcnow()
-            user.save()
-        except UserRole.DoesNotExist:
-            raise UserNotFound("The user is not found.")
+    # def delete_user(self, user_id):
+    #     try:
+    #         manage_role = [
+    #             RoleName.SUPER_ADMIN,
+    #             RoleName.STAFF,
+    #             RoleName.ADMIN,
+    #             RoleName.DEVELOP,
+    #         ]
+    #         user = UserRole.objects.get(
+    #             user__id=user_id,
+    #             role__name__in=manage_role,
+    #             deleted_at=None,
+    #         )
+    #         user.deleted_at = datetime.utcnow()
+    #         user.save()
+    #     except UserRole.DoesNotExist:
+    #         raise UserNotFound("The user is not found.")
 
     def send_mail(self, email):
         template_mail_invite = "mails/master_invite.html"

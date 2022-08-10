@@ -8,11 +8,9 @@ from django.contrib.auth.base_user import (
     AbstractBaseUser,
     BaseUserManager,
 )
-from django.contrib.auth.models import Group
 from django.db import models
 from rest_framework_jwt.settings import api_settings
 
-from core.constants import PermissionStatus
 from core.exceptions import UserNotFound
 from utils.validators import validate_phone_number
 
@@ -22,18 +20,18 @@ jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
 # Create your models here.
 
-class Settings(models.Model):
-    """
-    The settings model represents the application wide settings that only admins can
-    change. This table can only contain a single row.
-    """
-
-    instance_id = models.SlugField(default=secrets.token_urlsafe)
-    allow_new_signups = models.BooleanField(
-        default=True,
-        help_text="Indicates whether new users can create a new account when signing "
-                  "up.",
-    )
+# class Settings(models.Model):
+#     """
+#     The settings model represents the application wide settings that only admins can
+#     change. This table can only contain a single row.
+#     """
+#
+#     instance_id = models.SlugField(default=secrets.token_urlsafe)
+#     allow_new_signups = models.BooleanField(
+#         default=True,
+#         help_text="Indicates whether new users can create a new account when signing "
+#                   "up.",
+#     )
 
 
 class TimeStampMixin(models.Model):
@@ -78,7 +76,10 @@ class User(AbstractBaseUser, TimeStampMixin):
     username = models.CharField(max_length=255, blank=True, null=True, unique=True)
     email = models.EmailField(max_length=200, blank=True, null=True, unique=True)
     phone = models.CharField(max_length=255, blank=True, null=True, validators=[validate_phone_number])
+    role = models.BooleanField(max_length=50, blank=True, null=True)
     avatar_url = models.CharField(max_length=255, blank=True, null=True)
+    address = models.CharField(max_length=255, blank=True, null=True)
+    date_of_birth = models.DateTimeField(blank=True, null=True)
     deleted_at = models.DateTimeField(blank=True, null=True)
     last_accessed_at = models.DateTimeField(blank=True, null=True)
     is_superuser = models.BooleanField(default=False)
@@ -143,59 +144,58 @@ class UserPin(TimeStampMixin):
         self.save()
         return self
 
-
-class UserLogEntry(models.Model):
-    actor = models.ForeignKey(User, on_delete=models.CASCADE)
-    action = models.CharField(max_length=20, choices=(("SIGNED_IN", "Signed in"),))
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        get_latest_by = "timestamp"
-        ordering = ["-timestamp"]
-
-
-class Permission(Group, TimeStampMixin):
-    permission_name = models.CharField(max_length=255, blank=True, null=True, help_text="Permission name")
-    description = models.TextField(max_length=255, blank=True, null=True)
-    category = models.IntegerField(choices=PermissionStatus.choices, default=None, null=True, blank=True)
-    deleted_at = models.DateTimeField(blank=True, null=True)
-
-    parent = models.ForeignKey(
-        "self",
-        on_delete=models.CASCADE,
-        default=None,
-        null=True,
-        blank=True,
-        related_name="permission_category"
-    )
-    objects = models.Manager()
-
-    class Meta:
-        verbose_name = "Permission"
-        verbose_name_plural = "Persmissions"
-
-    def __unicode__(self):
-        return self.name
-
-    @staticmethod
-    def get_permission_of_super_admin():
-        return map(lambda perm: perm.get("permission_name"), Permission.objects.all())
+# class UserLogEntry(models.Model):
+#     actor = models.ForeignKey(User, on_delete=models.CASCADE)
+#     action = models.CharField(max_length=20, choices=(("SIGNED_IN", "Signed in"),))
+#     timestamp = models.DateTimeField(auto_now_add=True)
+#
+#     class Meta:
+#         get_latest_by = "timestamp"
+#         ordering = ["-timestamp"]
 
 
-class Role(TimeStampMixin):
-    name = models.CharField(max_length=255, blank=True, null=True)
-    deleted_at = models.DateTimeField(blank=True, null=True)
+# class Permission(Group, TimeStampMixin):
+#     permission_name = models.CharField(max_length=255, blank=True, null=True, help_text="Permission name")
+#     description = models.TextField(max_length=255, blank=True, null=True)
+#     category = models.IntegerField(choices=PermissionStatus.choices, default=None, null=True, blank=True)
+#     deleted_at = models.DateTimeField(blank=True, null=True)
+#
+#     parent = models.ForeignKey(
+#         "self",
+#         on_delete=models.CASCADE,
+#         default=None,
+#         null=True,
+#         blank=True,
+#         related_name="permission_category"
+#     )
+#     objects = models.Manager()
+#
+#     class Meta:
+#         verbose_name = "Permission"
+#         verbose_name_plural = "Persmissions"
+#
+#     def __unicode__(self):
+#         return self.name
+#
+#     @staticmethod
+#     def get_permission_of_super_admin():
+#         return map(lambda perm: perm.get("permission_name"), Permission.objects.all())
 
-    permissions = models.ManyToManyField(Permission, related_name="role_permissions")
 
-    class Meta:
-        db_table = "role"
+# class Role(TimeStampMixin):
+#     name = models.CharField(max_length=255, blank=True, null=True)
+#     deleted_at = models.DateTimeField(blank=True, null=True)
+#
+#     permissions = models.ManyToManyField(Permission, related_name="role_permissions")
+#
+#     class Meta:
+#         db_table = "role"
 
 
-class UserRole(TimeStampMixin):
-    role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, related_name="user_role_role")
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="user_role_user")
-    is_active = models.BooleanField(default=False)
-
-    class Meta:
-        db_table = "user_role"
+# class UserRole(TimeStampMixin):
+#     role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, related_name="user_role_role")
+#     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="user_role_user")
+#     is_active = models.BooleanField(default=False)
+#
+#     class Meta:
+#         db_table = "user_role"

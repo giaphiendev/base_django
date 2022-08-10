@@ -2,7 +2,7 @@ from django.contrib.auth.models import update_last_login
 from rest_framework import serializers
 from rest_framework_jwt.serializers import JSONWebTokenSerializer
 
-from core.models import User, UserLogEntry
+from core.models import User
 from core.users.utils import normalize_email_address
 from utils.validators import password_validation
 
@@ -30,6 +30,7 @@ class RegisterSerializer(serializers.Serializer):
                   "be included in the response.",
     )
 
+
 class ChangePasswordBodyValidationSerializer(serializers.Serializer):
     old_password = serializers.CharField()
     new_password = serializers.CharField(validators=[password_validation])
@@ -38,7 +39,6 @@ class ChangePasswordBodyValidationSerializer(serializers.Serializer):
 class ResetPasswordBodyValidationSerializer(serializers.Serializer):
     token = serializers.CharField()
     password = serializers.CharField(validators=[password_validation])
-
 
 
 class SendResetPasswordEmailBodyValidationSerializer(serializers.Serializer):
@@ -50,7 +50,6 @@ class SendResetPasswordEmailBodyValidationSerializer(serializers.Serializer):
                   "token is going to be appended to the base_url (base_url "
                   "'/token')."
     )
-
 
 
 class NormalizedEmailField(serializers.EmailField):
@@ -81,7 +80,7 @@ class NormalizedEmailWebTokenSerializer(JSONWebTokenSerializer):
             raise serializers.ValidationError(msg)
 
         update_last_login(None, user)
-        UserLogEntry.objects.create(actor=user, action="SIGNED_IN")
+        # UserLogEntry.objects.create(actor=user, action="SIGNED_IN")
         # Call the user_signed_in method for each plugin that is un the registry to
         # notify all plugins that a user has signed in.
         from core.registries import plugin_registry

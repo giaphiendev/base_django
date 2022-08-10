@@ -17,7 +17,7 @@ from core.exceptions import (
     PinNotExists,
     PinExpired
 )
-from core.models import User, Role, UserRole
+from core.models import User
 from core.users.handler import UserHandler
 from utils import error
 from utils.logger import logger_raise_warn_exception
@@ -96,14 +96,14 @@ class CustomerSignupSerializer(TokenObtainPairSerializer):
         refresh = self.get_token(user)
         pin_object.save()
 
-        try:
-            UserRole.objects.create(
-                user=user,
-                role=Role.objects.get(name=RoleName.CUSTOMER),
-                is_active=True,
-            )
-        except Role.DoesNotExist:
-            raise RoleNotFound("The role is not exit")
+        # try:
+        #     UserRole.objects.create(
+        #         user=user,
+        #         role=Role.objects.get(name=RoleName.CUSTOMER),
+        #         is_active=True,
+        #     )
+        # except Role.DoesNotExist:
+        #     raise RoleNotFound("The role is not exit")
         return {
             "refresh": str(refresh),
             "refresh_expired": refresh.current_time + refresh.lifetime,

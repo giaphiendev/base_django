@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
 
-from .models import (
-    Settings,
-)
+# from .models import (
+#     Settings,
+# )
 from .exceptions import (
     IsNotAdminError,
 )
@@ -19,11 +19,11 @@ class CoreHandler:
         :return: The settings instance.
         :rtype: Settings
         """
-
-        try:
-            return Settings.objects.all()[:1].get()
-        except Settings.DoesNotExist:
-            return Settings.objects.create()
+        pass
+        # try:
+        #     return Settings.objects.all()[:1].get()
+        # except Settings.DoesNotExist:
+        #     return Settings.objects.create()
 
     def update_settings(self, user, settings_instance=None, **kwargs):
         """
