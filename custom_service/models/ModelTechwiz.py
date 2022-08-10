@@ -71,6 +71,7 @@ class StudyResource(TimeStampMixin):
     link = models.CharField(max_length=255, blank=True, null=True)
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True,
                                 related_name="study_resource_subject")
+    student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, related_name="study_resource_student")
 
     class Meta:
         db_table = "study_resource"
@@ -78,7 +79,7 @@ class StudyResource(TimeStampMixin):
 
 class HelpLine(TimeStampMixin):
     title = models.CharField(max_length=50, null=True, blank=True)
-    name = models.DateTimeField(null=True, blank=True)
+    name = models.CharField(max_length=100)
     phone = models.CharField(max_length=15, blank=True, null=True, validators=[validate_phone_number])
     type = models.CharField(max_length=50, blank=True, null=True)
 

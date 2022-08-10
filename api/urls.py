@@ -9,6 +9,9 @@ from .auth import urls as auth_urls
 from .user import urls as user_urls
 from .report import urls as report_urls
 # from .post import urls as post_urls
+from .myClass import urls as myClass_urls
+from .helplines import urls as helpline_urls
+from .studyResource import urls as resource_urls
 
 app_name = "api"
 
@@ -46,5 +49,8 @@ urlpatterns = (
         # demo api for post model
         # path("posts/", include(post_urls, namespace="post")),
         path("report/", include(report_urls, namespace="report")),
+        path("myclass/", include(myClass_urls, namespace="myClass")),
+        path("helplines/", include(helpline_urls, namespace="helplines")),
+        path("studyresource/", include(resource_urls, namespace="resources"))
     ]
 )
