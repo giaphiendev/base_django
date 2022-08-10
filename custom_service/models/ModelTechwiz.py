@@ -4,6 +4,11 @@ from django.db import models
 from utils.validators import validate_phone_number
 
 
+class TermStatus(models.TextChoices):
+    TERM1 = 'TERM1'
+    TERM2 = 'TERM2'
+
+
 class MyClass(TimeStampMixin):
     name = models.CharField(max_length=255, blank=True, null=True)
 
@@ -12,7 +17,7 @@ class MyClass(TimeStampMixin):
 
 
 class Student(TimeStampMixin):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="user_student")
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name="user_student")
     parent = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="user_student_parent")
     my_class = models.ForeignKey(MyClass, on_delete=models.SET_NULL, null=True, related_name="my_class_user")
 
@@ -30,7 +35,7 @@ class Subject(TimeStampMixin):
 
 class Exam(TimeStampMixin):
     name = models.CharField(max_length=255, blank=True, null=True)
-    term = models.CharField(max_length=255, blank=True, null=True)
+    term = models.CharField(choices=TermStatus.choices, max_length=20, null=True, blank=True)
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, related_name="exam_subject")
 
     class Meta:
@@ -40,6 +45,7 @@ class Exam(TimeStampMixin):
 class Grade(TimeStampMixin):
     mark = models.FloatField(blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
+
     exam = models.ForeignKey(Exam, on_delete=models.SET_NULL, null=True, related_name="grade_exam")
     student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, related_name="grade_student")
 
@@ -52,7 +58,8 @@ class ClassTeacherSubject(TimeStampMixin):
                                  related_name="class_teacher_subject_my_class")
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True,
                                 related_name="class_teacher_subject_subject")
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="class_teacher_subject_user")
+    teacher = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,
+                                related_name="class_teacher_subject_teacher")
 
     class Meta:
         db_table = "class_teacher_subject"
@@ -64,7 +71,6 @@ class StudyResource(TimeStampMixin):
     link = models.CharField(max_length=255, blank=True, null=True)
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True,
                                 related_name="study_resource_subject")
-    student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, related_name="study_resource_student")
 
     class Meta:
         db_table = "study_resource"
@@ -86,7 +92,7 @@ class RevisionClass(TimeStampMixin):
     status = models.BooleanField(default=1)
 
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, related_name="revision_class_subject")
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="revision_class_user")
+    teacher = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="revision_class_teacher")
 
     class Meta:
         db_table = "revision_class"

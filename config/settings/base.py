@@ -97,7 +97,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_HOST = os.getenv("REDIS_HOST", "redis")
 REDIS_PORT = os.getenv("REDIS_PORT", "6379")
 REDIS_USERNAME = os.getenv("REDIS_USER", "")
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
@@ -327,15 +327,15 @@ EXPORT_FILE_EXPIRE_MINUTES = 60
 # FOR SEND EMAIL
 EMAIL_BACKEND = "djcelery_email.backends.CeleryEmailBackend"
 
-if os.getenv("EMAIL_SMTP", ""):
+if os.getenv("EMAIL_SMTP", "SMTP"):
     CELERY_EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-    EMAIL_BACKEND = "django_smtp_ssl.SSLEmailBackend"  # 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # "django_smtp_ssl.SSLEmailBackend"  # 'django.core.mail.backends.smtp.EmailBackend'
     # EMAIL_SMTP_USE_TLS for backwards compatibility after
     # fixing #448.
     EMAIL_USE_TLS = True
     EMAIL_HOST = os.getenv("EMAIL_SMTP_HOST", "smtp.gmail.com")
     EMAIL_PORT = os.getenv("EMAIL_SMTP_PORT", "587")
-    EMAIL_HOST_USER = os.getenv("EMAIL_SMTP_USER", '')
+    EMAIL_HOST_USER = os.getenv("EMAIL_SMTP_USER", 'giaphiendev@gmail.com')
     EMAIL_HOST_PASSWORD = os.getenv("EMAIL_SMTP_PASSWORD", "jklteovxvfwkkkpv")
 
 else:

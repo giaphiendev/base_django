@@ -34,6 +34,12 @@ jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 #     )
 
 
+class UserType(models.TextChoices):
+    STUDENT = 'STUDENT'
+    TEACHER = 'TEACHER'
+    PARENT = 'PARENT'
+
+
 class TimeStampMixin(models.Model):
     """
     An abstract base class model that provides self-updating
@@ -76,7 +82,7 @@ class User(AbstractBaseUser, TimeStampMixin):
     username = models.CharField(max_length=255, blank=True, null=True, unique=True)
     email = models.EmailField(max_length=200, blank=True, null=True, unique=True)
     phone = models.CharField(max_length=255, blank=True, null=True, validators=[validate_phone_number])
-    role = models.BooleanField(max_length=50, blank=True, null=True)
+    role = models.CharField(choices=UserType.choices, max_length=50, blank=True, null=True)
     avatar_url = models.CharField(max_length=255, blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
     date_of_birth = models.DateTimeField(blank=True, null=True)

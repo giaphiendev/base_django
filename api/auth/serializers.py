@@ -28,10 +28,10 @@ class CustomizeTokenObtainPairPatchedSerializer(TokenObtainPairSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["email"] = serializers.EmailField()
-        self.fields["pin"] = serializers.IntegerField()
-        self.fields["token"] = serializers.CharField()
+        # self.fields["pin"] = serializers.IntegerField()
+        # self.fields["token"] = serializers.CharField()
         del self.fields['username']
-        del self.fields['password']
+        # del self.fields['password']
 
     @map_exceptions(
         {
@@ -42,7 +42,7 @@ class CustomizeTokenObtainPairPatchedSerializer(TokenObtainPairSerializer):
         }
     )
     def validate(self, request_data):
-        user = UserHandler().get_user_by_pin(request_data)
+        user = UserHandler().get_user_by_password(request_data)
         refresh = self.get_token(user)
 
         return {

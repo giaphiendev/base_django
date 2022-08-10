@@ -7,6 +7,7 @@ from drf_yasg import openapi
 from .webhooks import urls as webhook_urls
 from .auth import urls as auth_urls
 from .user import urls as user_urls
+from .report import urls as report_urls
 # from .post import urls as post_urls
 
 app_name = "api"
@@ -44,5 +45,6 @@ urlpatterns = (
         path("user/", include(user_urls, namespace="user")),
         # demo api for post model
         # path("posts/", include(post_urls, namespace="post")),
+        path("report/", include(report_urls, namespace="report")),
     ]
 )

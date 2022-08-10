@@ -43,7 +43,8 @@ class CustomSignupPinView(APIView):
 
     def get(self, request):
         pin = UserPin().generate_pin_sign_up()
-        # send_email_from_celery.delay(pin.code)
+        data = {'email': 'hiencoday363@yopmail.com', 'pin': pin.code}
+        send_email_from_celery.delay(data)
         response = {
             "result": "success",
             "payload": {"token": str(pin.device_token)},
