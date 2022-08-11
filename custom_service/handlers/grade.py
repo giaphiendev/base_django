@@ -1,10 +1,53 @@
 from core.exceptions import UserNotFound
 from core.models import User
 from custom_service.exceptions import StudentNotFound, SubjectNotFound
-from custom_service.models.ModelTechwiz import Grade, Student, Subject
+from custom_service.models.ModelTechwiz import Grade, Student, Subject, NameExam, TermStatus, ClassTeacherSubject
 
 
 class GradeHandle:
+
+    def list_of_grade_by_class(self, data):
+        '''
+        arg:
+            data: {class_id: 123, subject_id: 123, term: TERM1 # TERM2}
+        return:
+        '''
+        # get list student_id
+        list_students = Student.objects.filter(my_class_id=data.get("class_id")).values_list("id", flat=True)
+        # get list grade by student id
+        list_grades = Grade.objects.filter(subject_id=data.get('subject_id'), term=data.get('term'),
+                                           student_id__in=list_students).select_related('student').select_related(
+            "student__user").all()
+        final = []
+        middle = []
+        assignment = []
+        for grade in list_grades:
+            data = {
+                "student_name": grade.student.user.first_name + ' ' + grade.student.user.last_name,
+                "grade": grade.mark,
+                "exam_date": grade.exam_date
+            }
+            if grade.type_exam == NameExam.MIDDLE:
+                middle.append(data)
+            if grade.type_exam == NameExam.FINAL:
+                final.append(data)
+            if grade.type_exam == NameExam.ASSIGNMENT:
+                assignment.append(data)
+        return [
+            {
+                "exam_name": NameExam.ASSIGNMENT,
+                "grades": assignment,
+            },
+            {
+                "exam_name": NameExam.MIDDLE,
+                "grades": middle,
+            },
+            {
+                "exam_name": NameExam.FINAL,
+                "grades": final,
+            },
+        ]
+
     def add_grade(self, data):
         '''
         arg:

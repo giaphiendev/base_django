@@ -2,13 +2,31 @@ import datetime
 
 from rest_framework import serializers
 
-from custom_service.models.ModelTechwiz import NameExam, TermStatus, Grade
+from custom_service.models.ModelTechwiz import NameExam, TermStatus, Grade, ClassTeacherSubject
 
 
 class GetGradeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Grade
         fields = "__all__"
+
+
+class GetClassSubjectSerializer(serializers.Serializer):
+    class Meta:
+        model = ClassTeacherSubject
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        return {
+            'class': {
+                'id': instance.my_class.id,
+                'name': instance.my_class.name,
+            },
+            'subject': {
+                'id': instance.subject.id,
+                'name': instance.subject.name,
+            },
+        }
 
 
 class PostGradeSerializer(serializers.Serializer):

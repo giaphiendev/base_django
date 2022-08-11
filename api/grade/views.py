@@ -2,11 +2,34 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.grade.serializers import PostGradeSerializer, GetGradeSerializer
+from api.grade.serializers import PostGradeSerializer, GetGradeSerializer, GetClassSubjectSerializer
 from core.decorators import validate_body, map_exceptions
 from custom_service.errors import ERROR_STUDENT_NOT_FOUND, ERROR_GRADE_NOT_FOUND
 from custom_service.exceptions import StudentNotFound
 from custom_service.handlers.grade import GradeHandle
+from custom_service.models.ModelTechwiz import ClassTeacherSubject
+
+
+class GetClassSubjectView(APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = GetClassSubjectSerializer
+
+    def get(self, request):
+        '''
+        get all grade of class
+        arg:
+            teacher_id
+        '''
+        teacher_id = request.GET.get('teacher_id', None)
+        if teacher_id is None:
+            return Response({"payload": []}, status=200)
+        list_class_subject = ClassTeacherSubject.objects.filter(teacher_id=teacher_id).select_related('my_class',
+                                                                                                      'subject').all()
+        serializer = self.serializer_class(list_class_subject, many=True).data
+        data = {
+            'payload': serializer
+        }
+        return Response(data, status=200)
 
 
 class CreateGradeView(APIView):
@@ -14,8 +37,26 @@ class CreateGradeView(APIView):
     serializer_class = PostGradeSerializer
 
     def get(self, request):
+        '''
+        get all grade of class
+        arg:
+            subject_id
+            class_id
+            term
+        '''
+        subject_id = request.GET.get('subject_id', None)
+        class_id = request.GET.get('class_id', None)
+        term = request.GET.get('term', None)
+        if subject_id is None or class_id is None or term is None:
+            return Response({"payload": []}, status=200)
+
+        grades = GradeHandle().list_of_grade_by_class({
+            "term": term,
+            "class_id": class_id,
+            "subject_id": subject_id
+        })
         data = {
-            'payload': None
+            'payload': grades
         }
         return Response(data, status=200)
 
