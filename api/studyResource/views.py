@@ -15,7 +15,11 @@ class GetResource(PaginationApiView):
     permission_classes = (AllowAny,)
 
     def get(self, request):
-        all_resource = StudyResource.objects.all()
+        subject_id = request.GET.get('subject_id', None)
+        if subject_id is None:
+            all_resource = StudyResource.objects.all()
+        else:
+            all_resource = StudyResource.objects.filter(subject_id=subject_id).all()
         page_info, paginated_data = self.get_paginated(all_resource)
         post_serializer = ResourceSerializer(paginated_data, many=True).data
         data = {
