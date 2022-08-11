@@ -92,3 +92,4 @@ psycopg2-binary==2.9.2
 mysqlclient>=2.0.1,<2.1.0
 Redis
 django_smtp_ssl
+django-mjml==0.11.0

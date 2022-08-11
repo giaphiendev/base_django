@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from api.serializers import FeedBackSerializer
 from core.decorators import validate_body
-from custom_service.task import send_feedback_by_email
+from custom_service.task import send_feedback_by_email, send_report_mark
 
 
 class FeedBackView(APIView):
@@ -18,4 +18,5 @@ class FeedBackView(APIView):
             data = serializer.data
             data['email'] = "hiencoday363@yopmail.com"
             send_feedback_by_email.delay(data)
+            # send_report_mark.delay(data)
         return Response({"payload": None}, status=200)

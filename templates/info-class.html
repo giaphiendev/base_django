@@ -1,0 +1,142 @@
+{% autoescape off %}
+
+<style>
+  table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  td {
+    /* border-bottom: 1px solid #dddddd; */
+    text-align: left;
+    padding: 8px;
+  }
+
+  /* tr:nth-child(even) {
+    background-color: #dddddd;
+  } */
+
+  tr {
+    border-bottom: 1px solid #dddddd;
+  }
+
+  tr:last-child {
+    border-bottom: none !important;
+  }
+</style>
+<div style="background-color: white; justify-content: center">
+  <div
+    style="
+      text-align: center;
+      background-color: #e5e5e5;
+      width: max-content;
+      padding: 10px;
+      font-family: Roboto;
+      align-items: center;
+      height: 700px;
+    "
+  >
+    <div
+      style="
+        text-align: center;
+        background-color: #ffffff;
+        width: 375px;
+        height: 700px;
+        border-radius: 4px;
+        justify-content: center;
+        align-items: center;
+      "
+    >
+      <div style="display: flex; padding: 10px">
+        <div>
+          <img src="{{ logo_url }}" alt="logo2" width="120" />
+        </div>
+        <div
+          style="
+            padding-left: 15px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+          "
+        >
+          <p style="margin-bottom: 0; color: #473f97">FPT aptech</p>
+          <p style="margin-top: 5px; font-size: 14px">CAU GIAY - HA NOI</p>
+        </div>
+      </div>
+      <div
+        style="
+          border-top: 2px solid #473f97;
+          border-bottom: 2px solid #473f97;
+          margin-top: 15px;
+        "
+      >
+        <h3 style="margin-top: 10px; margin-bottom: 10px; color: #473f97">
+          REPORT CARD
+        </h3>
+      </div>
+      <!-- avatar -->
+      <div style="display: flex; padding: 10px">
+        <div
+          style="
+            width: 70px;
+            height: 70px;
+            overflow: hidden;
+            border-radius: 50%;
+          "
+        >
+          <img
+            style="background-color: black"
+            src="{{ logo_url }}"
+            alt="logo2"
+            width="70"
+          />
+        </div>
+        <div
+          style="
+            padding-left: 15px;
+            width: 75%;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+          "
+        >
+          <p style="text-align: start; margin-bottom: 0">Giap Van Hien</p>
+          <p style="text-align: start; margin-top: 0; font-size: 12px">
+            Ha Long - Quang Ninh
+          </p>
+        </div>
+      </div>
+      <!-- table -->
+      <div>
+        <table>
+          <tr>
+            <td>Alfreds Futterkiste</td>
+            <td>Maria Anders</td>
+          </tr>
+          <tr>
+            <td>Alfreds Futterkiste</td>
+            <td>Maria Anders</td>
+          </tr>
+        </table>
+      </div>
+      <!-- end table -->
+      <div
+        style="
+          border-top: 2px solid #473f97;
+          border-bottom: 2px solid #473f97;
+          margin-top: 15px;
+        "
+      >
+        <h3 style="margin-top: 10px; margin-bottom: 10px; color: #473f97">
+          REPORT CARD
+        </h3>
+      </div>
+      <!-- cut here -->
+    </div>
+  </div>
+</div>
+
+{% endautoescape %}
