@@ -179,7 +179,7 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        "NAME": "core.user.password_validation.MaximumLengthValidator",
+        "NAME": "core.utils.MaximumLengthValidator",
     },
 ]
 

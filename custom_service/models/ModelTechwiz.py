@@ -9,6 +9,12 @@ class TermStatus(models.TextChoices):
     TERM2 = 'TERM2'
 
 
+class NameExam(models.TextChoices):
+    MIDDLE = 'MIDDLE'
+    FINAL = 'FINAL'
+    ASSIGNMENT = 'ASSIGNMENT'
+
+
 class MyClass(TimeStampMixin):
     name = models.CharField(max_length=255, blank=True, null=True)
 
@@ -34,8 +40,9 @@ class Subject(TimeStampMixin):
 
 
 class Exam(TimeStampMixin):
-    name = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(choices=NameExam.choices, max_length=255, blank=True, null=True)
     term = models.CharField(choices=TermStatus.choices, max_length=20, null=True, blank=True)
+    weight = models.FloatField(null=True, blank=True)
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, related_name="exam_subject")
 
     class Meta:

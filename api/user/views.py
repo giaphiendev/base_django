@@ -19,7 +19,7 @@ from api.errors import (
     ERROR_INVALID_OLD_PASSWORD,
     EXPIRED_TOKEN_SIGNATURE,
     ERROR_USER_NOT_FOUND,
-    ERROR_HOSTNAME_IS_NOT_ALLOWED
+    ERROR_HOSTNAME_IS_NOT_ALLOWED, PIN_NOT_EXISTS, PIN_EXPIRED
 )
 from api.schemas import create_user_response_schema, get_error_schema, authenticate_user_schema
 from api.user.serializers import (
@@ -28,7 +28,7 @@ from api.user.serializers import (
     ChangePasswordBodyValidationSerializer,
     ResetPasswordBodyValidationSerializer,
     SendResetPasswordEmailBodyValidationSerializer,
-    NormalizedEmailWebTokenSerializer
+    NormalizedEmailWebTokenSerializer, GetUserSerializer, UpdateUserSerializer, ForgotPasswordBodyValidationSerializer
 )
 from core.decorators import map_exceptions, validate_body
 from core.exceptions import (
@@ -36,7 +36,7 @@ from core.exceptions import (
     DisabledSignupError,
     InvalidPassword,
     UserNotFound,
-    BaseURLHostnameNotAllowed
+    BaseURLHostnameNotAllowed, PinExpired, PinNotExists
 )
 from core.jwt import user_data_registry
 from core.users.handler import UserHandler
@@ -46,7 +46,7 @@ jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
 
 class UserView(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
 
     @extend_schema(
         tags=["User"],
@@ -100,6 +100,15 @@ class UserView(APIView):
 
         return Response(response)
 
+    @validate_body(UpdateUserSerializer)
+    def put(self, request, data):
+        """update a new user."""
+
+        user = UserHandler().update_user_multi_field(data)
+
+        response = {"payload": GetUserSerializer(user).data}
+        return Response(response, status=200)
+
 
 class ChangePasswordView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -138,6 +147,30 @@ class ChangePasswordView(APIView):
         )
 
         return Response("", status=204)
+
+
+class ForgotPasswordView(APIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ForgotPasswordBodyValidationSerializer
+
+    @map_exceptions(
+        {
+            InvalidPassword: ERROR_INVALID_OLD_PASSWORD,
+            PinExpired: PIN_EXPIRED,
+            PinNotExists: PIN_NOT_EXISTS,
+        }
+    )
+    @validate_body(ForgotPasswordBodyValidationSerializer)
+    def post(self, request, data):
+        """Changes the user's password if forgot."""
+        serializer = self.serializer_class(data=data)
+        if serializer.is_valid(raise_exception=True):
+            handler = UserHandler()
+            handler.create_new_password(
+                serializer.data.get('email'), serializer.data.get('new_password')
+            )
+
+            return Response({"payload": None}, status=200)
 
 
 class ResetPasswordView(APIView):

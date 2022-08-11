@@ -154,6 +154,20 @@ class UserHandler:
 
         return user
 
+    def update_user_multi_field(self, data):
+        """
+        Update user modifiable properties
+        args:
+            data: {id: 1, first_name: '', last_name: ''}
+        return:
+            user
+        """
+        try:
+            User.objects.filter(id=data.get('id')).update(**data)
+            return User.objects.get(pk=data.get("id"))
+        except User.DoesNotExist:
+            raise UserNotFound('User not found')
+
     def update_user(self, user, first_name=None, language=None):
         """
         Update user modifiable properties
@@ -248,6 +262,21 @@ class UserHandler:
         user.save()
 
         return user
+
+    def create_new_password(self, email, new_password):
+        """
+        create new password
+        """
+        try:
+            user = User.objects.get(email=email)
+            validate_password(new_password, user)
+        except User.DoesNotExist:
+            raise UserNotFound('User not found')
+        except ValidationError as e:
+            raise PasswordDoesNotMatchValidation(e.messages)
+
+        user.set_password(new_password)
+        user.save()
 
     def change_password(self, user, old_password, new_password):
         """
@@ -344,7 +373,7 @@ class UserHandler:
         except UserPin.DoesNotExist:
             raise PinNotExists('Pin not exists')
         if delete_pin:
-            UserPin.objects.get(code=data.get("pin", "")).delete()
+            UserPin.objects.get(code=data.get("pin", ""), device_token=data.get("token", "")).delete()
         return pin
 
     def get_super_user_by_email(self, email):

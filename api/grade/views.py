@@ -1,14 +1,38 @@
-# from rest_framework.permissions import IsAuthenticated
-# from rest_framework.response import Response
-# from rest_framework.views import APIView
-#
-# from api.post.serializers import PostSerializer, PutPostSerializer
-# from core.decorators import map_exceptions, validate_body
-# from custom_service.errors import ERROR_POST_NOT_FOUND
-# from custom_service.exceptions import PostNotFound
-# from custom_service.handlers.demo import PostHandler
-# from custom_service.models.demo import Post
-# from utils.base_views import PaginationApiView
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from api.grade.serializers import PostGradeSerializer
+from core.decorators import validate_body, map_exceptions
+from custom_service.errors import ERROR_STUDENT_NOT_FOUND, ERROR_GRADE_NOT_FOUND
+from custom_service.exceptions import StudentNotFound, ExamNotFound
+from custom_service.handlers.grade import GradeHandle
+
+
+class CreateGradeView(APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PostGradeSerializer
+
+    def get(self, request):
+        data = {
+            'payload': None
+        }
+        return Response(data, status=200)
+
+    @map_exceptions(
+        {
+            StudentNotFound: ERROR_STUDENT_NOT_FOUND,
+            ExamNotFound: ERROR_GRADE_NOT_FOUND,
+        }
+    )
+    @validate_body(PostGradeSerializer)
+    def post(self, request, data):
+        GradeHandle().add_grade(data)
+        data = {
+            'payload': None
+        }
+
+        return Response(data, status=200)
 #
 #
 # class GetListPostView(PaginationApiView):

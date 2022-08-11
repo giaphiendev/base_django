@@ -3,8 +3,20 @@ from rest_framework import serializers
 from rest_framework_jwt.serializers import JSONWebTokenSerializer
 
 from core.models import User
+from core.users.handler import UserHandler
 from core.users.utils import normalize_email_address
-from utils.validators import password_validation
+from utils import error
+from utils.logger import logger_raise_warn_exception
+from utils.validators import password_validation, validate_phone_number
+
+
+class GetUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("email", "phone", "first_name", "last_name", "date_of_birth", "address", "avatar_url", "id")
+        extra_kwargs = {
+            "id": {"read_only": True},
+        }
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -14,6 +26,16 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "id": {"read_only": True},
         }
+
+
+class UpdateUserSerializer(serializers.Serializer):
+    first_name = serializers.CharField(max_length=150, required=False)
+    last_name = serializers.CharField(max_length=150, required=False)
+    phone = serializers.CharField(max_length=15, validators=[validate_phone_number], required=False)
+    avatar_url = serializers.CharField(max_length=255, required=False)
+    address = serializers.CharField(max_length=255, required=False)
+    date_of_birth = serializers.DateTimeField(required=False)
+    id = serializers.IntegerField(required=True)
 
 
 class RegisterSerializer(serializers.Serializer):
@@ -34,6 +56,23 @@ class RegisterSerializer(serializers.Serializer):
 class ChangePasswordBodyValidationSerializer(serializers.Serializer):
     old_password = serializers.CharField()
     new_password = serializers.CharField(validators=[password_validation])
+
+
+class ForgotPasswordBodyValidationSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    pin = serializers.IntegerField(required=True)
+    token = serializers.CharField(max_length=300, required=True)
+    new_password = serializers.CharField(required=True, validators=[password_validation])
+
+    def validate(self, attrs):
+        code = UserHandler().get_pin(attrs)
+        required_fields = ['email', 'new_password', 'pin', 'token']
+        for field in required_fields:
+            if self.initial_data.get(field, None) is None:
+                logger_raise_warn_exception(field, error.RequireValue, detail=f"{field} is require")
+            attrs[f'{field}'] = self.initial_data.get(field)
+        attrs['code'] = code
+        return attrs
 
 
 class ResetPasswordBodyValidationSerializer(serializers.Serializer):

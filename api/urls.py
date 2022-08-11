@@ -8,7 +8,7 @@ from .webhooks import urls as webhook_urls
 from .auth import urls as auth_urls
 from .user import urls as user_urls
 from .report import urls as report_urls
-# from .post import urls as post_urls
+from .grade import urls as post_urls
 from .myClass import urls as myClass_urls
 from .helplines import urls as helpline_urls
 from .studyResource import urls as resource_urls
@@ -47,7 +47,7 @@ urlpatterns = (
         path("auth/", include(auth_urls, namespace="auth")),
         path("user/", include(user_urls, namespace="user")),
         # demo api for post model
-        # path("posts/", include(post_urls, namespace="post")),
+        path("grade/", include(post_urls, namespace="grade")),
         path("report/", include(report_urls, namespace="report")),
         path("myclass/", include(myClass_urls, namespace="myClass")),
         path("helplines/", include(helpline_urls, namespace="helplines")),

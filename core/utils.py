@@ -2,6 +2,8 @@ import base64
 from contextlib import contextmanager
 from typing import Dict, Union, Tuple, Callable, Optional, Type
 
+from django.core.exceptions import ValidationError
+
 from django.utils.encoding import force_str
 from rest_framework import status
 from rest_framework.exceptions import APIException
@@ -423,3 +425,31 @@ def encode_base_64(string):
     sample_string_bytes = string.encode("ascii")
     base64_bytes = base64.b64encode(sample_string_bytes)
     return base64_bytes.decode("ascii")
+
+
+class MaximumLengthValidator:
+    """
+    Validate whether the password is of a maximum length.
+    """
+
+    def __init__(self, max_length=256):
+        self.max_length = max_length
+
+    def validate(self, password, user=None):
+        if len(password) > self.max_length:
+            error = (
+                f"This password is too long. "
+                f"It must not exceed {self.max_length} character"
+                f"{'s' if self.max_length != 1 else ''}."
+            )
+            raise ValidationError(
+                error,
+                code="password_too_long",
+                params={"max_length": self.max_length},
+            )
+
+    def get_help_text(self):
+        return (
+            f"Your password must not exceed {self.max_length} character"
+            f"{'s' if self.max_length != 1 else ''}."
+        )

@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 
 
 def validate_phone_number(value):
-    if not re.match('^[0-9]{1,14}$', value):
+    if not re.match('^[0-9]{8,12}$', value):
         raise serializers.ValidationError(u'The phone is invalid')
 
 
