@@ -12,7 +12,7 @@ from utils.base_views import PaginationApiView
 
 
 class GetListMyClassView(PaginationApiView):
-    permission_classes = (AllowAny,) #IsAuthenticated
+    permission_classes = (AllowAny,)
 
     def get(self, request):
         all_post = MyClass.objects.all()
@@ -59,7 +59,7 @@ class DetailMyClassView(APIView):
     )
     @validate_body(PutMyClassSerializer)
     def put(self, request, class_id, data):
-        myClass = self.handler_class().update_post(class_id, data)
+        myClass = self.handler_class().update_myClass(class_id, data)
         myClass_serializer = self.serializer_class(myClass).data
         data_res = {
             'data': myClass_serializer

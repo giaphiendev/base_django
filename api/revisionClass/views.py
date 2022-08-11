@@ -8,7 +8,7 @@ from custom_service.models.ModelTechwiz import Student
 
 
 class GetRevision(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
     def get(self, request):
         student_id = 1

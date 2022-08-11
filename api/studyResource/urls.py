@@ -1,13 +1,13 @@
 from django.urls import re_path
 
-from api.myClass.views import (
-    GetListMyClassView,
-    DetailMyClassView
+from api.studyResource.views import (
+    GetResource,
+    DetailResourceView
 )
 
 app_name = "api.studyResource"
 
 urlpatterns = [
-    re_path(r"^$", GetListMyClassView.as_view(), name="index"),
-    re_path(r"^(?P<myClass_id>[0-9]+)$", DetailMyClassView.as_view(), name="detail"),
+    re_path(r"^$", GetResource.as_view(), name="index"),
+    re_path(r"^(?P<myClass_id>[0-9]+)$", DetailResourceView.as_view(), name="detail"),
 ]

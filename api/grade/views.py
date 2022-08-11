@@ -33,7 +33,7 @@ class GetClassSubjectView(APIView):
 
 
 class CreateGradeView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
     serializer_class = PostGradeSerializer
 
     def get(self, request):

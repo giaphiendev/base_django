@@ -11,8 +11,8 @@ from custom_service.models.ModelTechwiz import StudyResource
 from utils.base_views import PaginationApiView
 
 
-class GetListMyClassView(PaginationApiView):
-    permission_classes = (AllowAny,) #IsAuthenticated
+class GetResource(PaginationApiView):
+    permission_classes = (AllowAny,)
 
     def get(self, request):
         all_resource = StudyResource.objects.all()

@@ -40,6 +40,7 @@ class UserType(models.TextChoices):
     STUDENT = 'STUDENT'
     TEACHER = 'TEACHER'
     PARENT = 'PARENT'
+    ADMIN = 'ADMIN'
 
 
 class TimeStampMixin(models.Model):
