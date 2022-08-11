@@ -2,7 +2,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.grade.serializers import PostGradeSerializer
+from api.grade.serializers import PostGradeSerializer, GetGradeSerializer
 from core.decorators import validate_body, map_exceptions
 from custom_service.errors import ERROR_STUDENT_NOT_FOUND, ERROR_GRADE_NOT_FOUND
 from custom_service.exceptions import StudentNotFound
@@ -26,9 +26,10 @@ class CreateGradeView(APIView):
     )
     @validate_body(PostGradeSerializer)
     def post(self, request, data):
-        GradeHandle().add_grade(data)
+        grade = GradeHandle().add_grade(data)
+        serializer = GetGradeSerializer(grade).data
         data = {
-            'payload': None
+            'payload': serializer
         }
 
         return Response(data, status=200)

@@ -66,16 +66,16 @@ class CustomerSignupSerializer(TokenObtainPairSerializer):
         self.fields["last_name"] = serializers.CharField()
 
         del self.fields['username']
-        del self.fields['password']
+        # del self.fields['password']
 
     def validate(self, attrs):
-        pin = UserHandler().get_pin(attrs)
+        # pin = UserHandler().get_pin(attrs)
         required_fields = ['email', 'password', 'first_name', 'last_name']
         for field in required_fields:
             if self.initial_data.get(field, None) is None:
                 logger_raise_warn_exception(field, error.RequireValue, detail=f"{field} is require")
             attrs[f'{field}'] = self.initial_data.get(field)
-        attrs['pin_object'] = pin
+        # attrs['pin_object'] = pin
         return attrs
 
     def create(self, validated_data, **kwargs):
@@ -92,10 +92,10 @@ class CustomerSignupSerializer(TokenObtainPairSerializer):
         except IntegrityError:
             user = User.objects.get(email=email)
 
-        pin_object = validated_data.get('pin_object')
-        pin_object.user = user
+        # pin_object = validated_data.get('pin_object')
+        # pin_object.user = user
         refresh = self.get_token(user)
-        pin_object.save()
+        # pin_object.save()
 
         # try:
         #     UserRole.objects.create(

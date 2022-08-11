@@ -6,3 +6,6 @@ class GradeNotFound(Exception):
 
 class StudentNotFound(Exception):
     """Raised when trying to get a post that does not exist."""
+
+class SubjectNotFound(Exception):
+    """Raised when trying to get a post that does not exist."""
