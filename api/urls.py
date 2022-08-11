@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path, include, re_path
 # from drf_spectacular.views import SpectacularJSONAPIView, SpectacularRedocView
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
@@ -13,6 +13,7 @@ from .myClass import urls as myClass_urls
 from .helplines import urls as helpline_urls
 from .studyResource import urls as resource_urls
 from .revisionClass import urls as revision_urls
+from .views import FeedBackView
 
 app_name = "api"
 
@@ -53,6 +54,7 @@ urlpatterns = (
         path("myclass/", include(myClass_urls, namespace="myClass")),
         path("helplines/", include(helpline_urls, namespace="helplines")),
         path("studyresource/", include(resource_urls, namespace="resources")),
-        path("revision/", include(revision_urls, namespace="revision"))
+        path("revision/", include(revision_urls, namespace="revision")),
+        re_path(r"^feedback$", FeedBackView.as_view(), name="feedback"),
     ]
 )

@@ -4,10 +4,11 @@ from rest_framework.views import APIView
 
 from api.grade.serializers import PostGradeSerializer, GetGradeSerializer, GetClassSubjectSerializer
 from core.decorators import validate_body, map_exceptions
+from core.models import UserType
 from custom_service.errors import ERROR_STUDENT_NOT_FOUND, ERROR_GRADE_NOT_FOUND
 from custom_service.exceptions import StudentNotFound
 from custom_service.handlers.grade import GradeHandle
-from custom_service.models.ModelTechwiz import ClassTeacherSubject
+from custom_service.models.ModelTechwiz import ClassTeacherSubject, Student
 
 
 class GetClassSubjectView(APIView):
@@ -20,16 +21,34 @@ class GetClassSubjectView(APIView):
         arg:
             teacher_id
         '''
-        teacher_id = request.GET.get('teacher_id', None)
-        if teacher_id is None:
+        role = request.user.role
+        if role is None:
             return Response({"payload": []}, status=200)
-        list_class_subject = ClassTeacherSubject.objects.filter(teacher_id=teacher_id).select_related('my_class',
-                                                                                                      'subject').all()
-        serializer = self.serializer_class(list_class_subject, many=True).data
-        data = {
-            'payload': serializer
-        }
-        return Response(data, status=200)
+        if role == UserType.TEACHER:
+            list_class_subject = ClassTeacherSubject.objects.filter(
+                teacher_id=request.user.id
+            ).select_related('my_class', 'subject').all()
+            serializer = self.serializer_class(list_class_subject, many=True, context=role).data
+            data = {
+                'payload': serializer
+            }
+            return Response(data, status=200)
+
+        elif role == UserType.STUDENT:
+            student = Student.objects.filter(user_id=request.user.id).first()
+            if student is None:
+                return Response({"payload": []}, status=200)
+            list_class_subject = ClassTeacherSubject.objects.filter(
+                my_class_id=student.my_class.id
+            ).select_related('my_class', 'subject').all()
+
+            serializer = self.serializer_class(list_class_subject, many=True, context=role).data
+            data = {
+                'payload': serializer
+            }
+            return Response(data, status=200)
+
+        return Response({"payload": []}, status=200)
 
 
 class CreateGradeView(APIView):

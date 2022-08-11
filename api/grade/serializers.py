@@ -2,6 +2,7 @@ import datetime
 
 from rest_framework import serializers
 
+from core.models import UserType
 from custom_service.models.ModelTechwiz import NameExam, TermStatus, Grade, ClassTeacherSubject
 
 
@@ -17,6 +18,13 @@ class GetClassSubjectSerializer(serializers.Serializer):
         fields = '__all__'
 
     def to_representation(self, instance):
+        if UserType.STUDENT == self.context:
+            return {
+                'subject': {
+                    'id': instance.subject.id,
+                    'name': instance.subject.name,
+                },
+            }
         return {
             'class': {
                 'id': instance.my_class.id,

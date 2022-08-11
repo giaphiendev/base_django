@@ -22,3 +22,20 @@ def send_email_from_celery(data):
         fail_silently=False,
     )
     logger.info(f"message from ss: {data.get('email')}")
+
+
+@app.task()
+def send_feedback_by_email(data):
+    '''
+    arg:
+        data: {title: "admin@admin.com", content: 123123}
+    '''
+    logger.info(f"Start send feed")
+    send_mail(
+        subject=data.get('title', "title"),
+        message=data.get('content', "content"),
+        from_email=settings.FROM_EMAIL,
+        recipient_list=[data.get('title', "hienaloso98@gmail.com")],
+        fail_silently=False,
+    )
+    logger.info(f"Send feed successful!")

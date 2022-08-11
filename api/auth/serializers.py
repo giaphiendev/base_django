@@ -8,11 +8,9 @@ from api.errors import (
     PIN_EXPIRED,
     PIN_NOT_EXISTS
 )
-from core.constants import RoleName
 from core.decorators import map_exceptions
 from core.exceptions import (
     InvalidPin,
-    RoleNotFound,
     UserNotFound,
     PinNotExists,
     PinExpired
@@ -21,6 +19,20 @@ from core.models import User
 from core.users.handler import UserHandler
 from utils import error
 from utils.logger import logger_raise_warn_exception
+
+
+class GetAllFieldUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = "__all__"
+        extra_kwargs = {
+            "password": {"write_only": True},
+            "last_accessed_at": {"write_only": True},
+            "is_superuser": {"write_only": True},
+            "is_staff": {"write_only": True},
+            "groups": {"write_only": True},
+            "user_permissions": {"write_only": True},
+        }
 
 
 class CustomizeTokenObtainPairPatchedSerializer(TokenObtainPairSerializer):
@@ -48,6 +60,7 @@ class CustomizeTokenObtainPairPatchedSerializer(TokenObtainPairSerializer):
         return {
             "success": True,
             "data": {
+                "user": GetAllFieldUserSerializer(user).data,
                 "refresh": str(refresh),
                 "refresh_expired": refresh.current_time + refresh.lifetime,
                 "access": str(refresh.access_token),
