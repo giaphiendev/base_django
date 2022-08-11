@@ -48,6 +48,7 @@ class Subject(TimeStampMixin):
     def __str__(self):
         return self.name
 
+
 #
 # class Exam(TimeStampMixin):
 #     name = models.CharField(choices=NameExam.choices, max_length=255, blank=True, null=True)
@@ -69,7 +70,9 @@ class Grade(TimeStampMixin):
     description = models.CharField(max_length=255, blank=True, null=True)
     type_exam = models.CharField(choices=NameExam.choices, max_length=50, blank=True, null=True)
     term = models.CharField(choices=TermStatus.choices, max_length=20, null=True, blank=True)
+    exam_date = models.DateField(blank=True, null=True)
 
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name="grade_teacher")
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, related_name="grade_subject")
     student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, related_name="grade_student")
 
