@@ -21,14 +21,21 @@ class MyClass(TimeStampMixin):
     class Meta:
         db_table = "class"
 
+    def __str__(self):
+        return self.name
+
 
 class Student(TimeStampMixin):
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name="user_student")
-    parent = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="user_student_parent")
+    parent = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,
+                               related_name="user_student_parent")
     my_class = models.ForeignKey(MyClass, on_delete=models.SET_NULL, null=True, related_name="my_class_user")
 
     class Meta:
         db_table = "student"
+
+    def __str__(self):
+        return self.user.username
 
 
 class Subject(TimeStampMixin):
@@ -38,26 +45,39 @@ class Subject(TimeStampMixin):
     class Meta:
         db_table = "subject"
 
+    def __str__(self):
+        return self.name
 
-class Exam(TimeStampMixin):
-    name = models.CharField(choices=NameExam.choices, max_length=255, blank=True, null=True)
-    term = models.CharField(choices=TermStatus.choices, max_length=20, null=True, blank=True)
-    weight = models.FloatField(null=True, blank=True)
-    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, related_name="exam_subject")
-
-    class Meta:
-        db_table = "exam"
-
+#
+# class Exam(TimeStampMixin):
+#     name = models.CharField(choices=NameExam.choices, max_length=255, blank=True, null=True)
+#     term = models.CharField(choices=TermStatus.choices, max_length=20, null=True, blank=True)
+#     weight = models.FloatField(null=True, blank=True)
+#     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, related_name="exam_subject")
+#
+#     class Meta:
+#         db_table = "exam"
+#
+#     def __str__(self):
+#         return self.name
+#
 
 class Grade(TimeStampMixin):
     mark = models.FloatField(blank=True, null=True)
+    start_year = models.IntegerField(blank=True, null=True)
+    end_year = models.IntegerField(blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
+    type_exam = models.CharField(choices=NameExam.choices, max_length=50, blank=True, null=True)
+    term = models.CharField(choices=TermStatus.choices, max_length=20, null=True, blank=True)
 
-    exam = models.ForeignKey(Exam, on_delete=models.SET_NULL, null=True, related_name="grade_exam")
+    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, related_name="grade_subject")
     student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, related_name="grade_student")
 
     class Meta:
         db_table = "grade"
+
+    def __str__(self):
+        return f'{self.term}-{self.type_exam}-{self.mark}'
 
 
 class ClassTeacherSubject(TimeStampMixin):
@@ -71,6 +91,9 @@ class ClassTeacherSubject(TimeStampMixin):
     class Meta:
         db_table = "class_teacher_subject"
 
+    def __str__(self):
+        return f'{self.subject.name}-{self.my_class.name}'
+
 
 class StudyResource(TimeStampMixin):
     name = models.CharField(max_length=255, blank=True, null=True)
@@ -83,6 +106,9 @@ class StudyResource(TimeStampMixin):
     class Meta:
         db_table = "study_resource"
 
+    def __str__(self):
+        return self.name
+
 
 class HelpLine(TimeStampMixin):
     title = models.CharField(max_length=50, null=True, blank=True)
@@ -92,6 +118,9 @@ class HelpLine(TimeStampMixin):
 
     class Meta:
         db_table = "help_line"
+
+    def __str__(self):
+        return self.title
 
 
 class RevisionClass(TimeStampMixin):
@@ -105,6 +134,9 @@ class RevisionClass(TimeStampMixin):
     class Meta:
         db_table = "revision_class"
 
+    def __str__(self):
+        return f"RevisionClass - {self.subject.name}"
+
 
 class TimeTable(TimeStampMixin):
     day_of_week = models.CharField(max_length=50, null=True, blank=True)
@@ -116,3 +148,6 @@ class TimeTable(TimeStampMixin):
 
     class Meta:
         db_table = "time_table"
+
+    def __str__(self):
+        return f"TimeTable - {self.revision_class.status}"

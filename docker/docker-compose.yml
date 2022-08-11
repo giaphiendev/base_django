@@ -44,6 +44,7 @@ services:
       dockerfile: ./docker/Dockerfile
       context: ../
     image: base_django_backend:latest
+    restart: on-failure
     environment:
       - PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL:-http://127.0.0.1:8000}
       # db
@@ -74,6 +75,7 @@ services:
 
   celery:
     image: base_django_backend:latest
+    restart: on-failure
     env_file:
       - ../.env
     environment:

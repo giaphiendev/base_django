@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from api.grade.serializers import PostGradeSerializer
 from core.decorators import validate_body, map_exceptions
 from custom_service.errors import ERROR_STUDENT_NOT_FOUND, ERROR_GRADE_NOT_FOUND
-from custom_service.exceptions import StudentNotFound, ExamNotFound
+from custom_service.exceptions import StudentNotFound
 from custom_service.handlers.grade import GradeHandle
 
 
@@ -22,7 +22,6 @@ class CreateGradeView(APIView):
     @map_exceptions(
         {
             StudentNotFound: ERROR_STUDENT_NOT_FOUND,
-            ExamNotFound: ERROR_GRADE_NOT_FOUND,
         }
     )
     @validate_body(PostGradeSerializer)

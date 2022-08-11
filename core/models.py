@@ -10,9 +10,11 @@ from django.contrib.auth.base_user import (
 )
 from django.db import models
 from rest_framework_jwt.settings import api_settings
+from django.contrib.auth.models import PermissionsMixin
 
 from core.exceptions import UserNotFound
 from utils.validators import validate_phone_number
+from django.utils.translation import gettext_lazy as _
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
@@ -76,7 +78,7 @@ class UserManager(BaseUserManager):
         return user
 
 
-class User(AbstractBaseUser, TimeStampMixin):
+class User(AbstractBaseUser, TimeStampMixin, PermissionsMixin):
     first_name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255, blank=True, null=True)
     username = models.CharField(max_length=255, blank=True, null=True, unique=True)
@@ -89,6 +91,11 @@ class User(AbstractBaseUser, TimeStampMixin):
     deleted_at = models.DateTimeField(blank=True, null=True)
     last_accessed_at = models.DateTimeField(blank=True, null=True)
     is_superuser = models.BooleanField(default=False)
+    is_staff = models.BooleanField(
+        _("staff status"),
+        default=False,
+        help_text=_("Designates whether the user can log into this admin site."),
+    )
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
