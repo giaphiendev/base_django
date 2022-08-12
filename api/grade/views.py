@@ -2,13 +2,70 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.grade.serializers import PostGradeSerializer, GetGradeSerializer, GetClassSubjectSerializer
+from api.grade.serializers import PostGradeSerializer, GetGradeSerializer, GetClassSubjectSerializer, \
+    GetSubjectSerializer
 from core.decorators import validate_body, map_exceptions
 from core.models import UserType
 from custom_service.errors import ERROR_STUDENT_NOT_FOUND, ERROR_GRADE_NOT_FOUND
 from custom_service.exceptions import StudentNotFound
 from custom_service.handlers.grade import GradeHandle
-from custom_service.models.ModelTechwiz import ClassTeacherSubject, Student
+from custom_service.models.ModelTechwiz import ClassTeacherSubject, Student, Subject
+
+
+class GetSubjectView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        '''
+        get subject
+        arg:
+        '''
+        role = request.user.role
+        if role is None:
+            return Response({"payload": []}, status=200)
+
+        if role == UserType.TEACHER:
+            list_subject = ClassTeacherSubject.objects.filter(teacher_id=request.user.id).select_related(
+                'subject').values_list('subject_id', 'subject__name').all()
+            data = []
+            for item in list(set(list_subject)):
+                data.append({
+                    "id": item[0],
+                    "name": item[1],
+                })
+            return Response({"payload": data}, status=200)
+        elif role == UserType.STUDENT:
+            student = Student.objects.filter(user=request.user).select_related('my_class').first()
+            list_subject = ClassTeacherSubject.objects.filter(my_class_id=student.my_class_id).select_related(
+                'subject').values_list(
+                'subject', flat=True
+            ).all()
+            data = []
+            for item in list(set(list_subject)):
+                data.append({
+                    "id": item[0],
+                    "name": item[1],
+                })
+            return Response({"payload": data}, status=200)
+
+        return Response({"payload": []}, status=200)
+
+
+class GetInputGradeView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        '''
+        get input grade,
+        only teacher has permission
+        arg:
+        '''
+        role = request.user.role
+        if role is None or role != UserType.TEACHER:
+            return Response({"payload": []}, status=200)
+
+        data_res = GradeHandle().get_input_grade(request.user.id)
+        return Response({"payload": data_res}, status=200)
 
 
 class GetClassSubjectView(APIView):

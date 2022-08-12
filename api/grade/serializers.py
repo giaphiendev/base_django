@@ -3,13 +3,19 @@ import datetime
 from rest_framework import serializers
 
 from core.models import UserType
-from custom_service.models.ModelTechwiz import NameExam, TermStatus, Grade, ClassTeacherSubject
+from custom_service.models.ModelTechwiz import NameExam, TermStatus, Grade, ClassTeacherSubject, Subject
 
 
 class GetGradeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Grade
         fields = "__all__"
+
+
+class GetSubjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subject
+        fields = ('id', 'name')
 
 
 class GetClassSubjectSerializer(serializers.Serializer):

@@ -6,14 +6,14 @@ from api.errors import (
     ERROR_INVALID_PIN,
     ERROR_USER_NOT_FOUND,
     PIN_EXPIRED,
-    PIN_NOT_EXISTS
+    PIN_NOT_EXISTS, ERROR_INVALID_PASSWORD
 )
 from core.decorators import map_exceptions
 from core.exceptions import (
     InvalidPin,
     UserNotFound,
     PinNotExists,
-    PinExpired
+    PinExpired, InvalidPassword
 )
 from core.models import User
 from core.users.handler import UserHandler
@@ -48,6 +48,7 @@ class CustomizeTokenObtainPairPatchedSerializer(TokenObtainPairSerializer):
     @map_exceptions(
         {
             InvalidPin: ERROR_INVALID_PIN,
+            InvalidPassword: ERROR_INVALID_PASSWORD,
             UserNotFound: ERROR_USER_NOT_FOUND,
             PinNotExists: PIN_NOT_EXISTS,
             PinExpired: PIN_EXPIRED

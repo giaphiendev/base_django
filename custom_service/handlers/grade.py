@@ -1,7 +1,8 @@
 from core.exceptions import UserNotFound
 from core.models import User
 from custom_service.exceptions import StudentNotFound, SubjectNotFound
-from custom_service.models.ModelTechwiz import Grade, Student, Subject, NameExam, TermStatus, ClassTeacherSubject
+from custom_service.models.ModelTechwiz import Grade, Student, Subject, NameExam, TermStatus, ClassTeacherSubject, \
+    MyClass
 
 
 class GradeHandle:
@@ -94,3 +95,57 @@ class GradeHandle:
         #     raise GradeNotFound('Grade not found')
         # except Student.DoesNotExist:
         #     raise StudentNotFound('Student not found')
+
+    def get_input_grade(self, teacher_id):
+        '''
+        arg
+            teacher_id: 1
+        return:
+            {
+                class: {
+                        name: '',
+                        id: '',
+                    },
+                subject: {
+                        name: '',
+                        id: '',
+                },
+                total_student: 10,
+                has_grade_student: 7,
+                exam: 'final',
+                last_update: ''
+            }
+        '''
+        grade = Grade.objects.filter(created_by_id=teacher_id).order_by('-created_by').first()
+
+        if grade is None:
+            return {}
+
+        exam = grade.type_exam
+        subject = grade.subject
+        last_update = grade.created_at
+        student = Student.objects.filter(id=grade.student_id).first()
+        my_class = MyClass.objects.filter(id=student.my_class.id).first()
+        list_student_id = Student.objects.filter(my_class_id=my_class.id).values_list('id', flat=True)
+
+        list_student_has_grade = Grade.objects.filter(
+            created_by_id=teacher_id,
+            type_exam=exam,
+            start_year=grade.start_year,
+            student_id__in=list_student_id
+        ).count()
+        data = {
+            "class": {
+                "name": my_class.name,
+                "id": my_class.id,
+            },
+            "subject": {
+                "name": subject.name,
+                "id": subject.id,
+            },
+            "total_student": len(list_student_id),
+            "has_grade_student": list_student_has_grade,
+            "exam": exam,
+            "last_update": last_update
+        }
+        return data
