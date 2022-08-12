@@ -21,14 +21,17 @@ services:
     networks:
       local:
     container_name: techwiz_mysql
+    restart: on-failure
     environment:
       - MYSQL_DATABASE=techwiz
       - MYSQL_USER=admin
       - MYSQL_PASSWORD=admin@123
       - MYSQL_ROOT_USER=root
       - MYSQL_ROOT_PASSWORD=root
-#    volumes:
-#      - ./Dump20220705.sql:/Dump20220705.sql
+      - MYSQL_CONN_MAX_AGE=28800
+      - TZ=UTC
+    volumes:
+      - ./techwiz_1.sql:/techwiz_1.sql
     ports:
       - "3306:3306"
 
