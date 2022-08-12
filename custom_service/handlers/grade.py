@@ -10,13 +10,14 @@ class GradeHandle:
     def list_of_grade_by_class(self, data):
         '''
         arg:
-            data: {class_id: 123, subject_id: 123, term: TERM1 # TERM2}
+            data: {class_id: 123, subject_id: 123, term: 1 # 2}
         return:
         '''
+        term = 'TERM1' if int(data.get('term')) == 1 else 'TERM2'
         # get list student_id
         list_students = Student.objects.filter(my_class_id=data.get("class_id")).values_list("id", flat=True)
         # get list grade by student id
-        list_grades = Grade.objects.filter(subject_id=data.get('subject_id'), term=data.get('term'),
+        list_grades = Grade.objects.filter(subject_id=data.get('subject_id'), term=term,
                                            student_id__in=list_students).select_related('student').select_related(
             "student__user").all()
         final = []
@@ -27,7 +28,8 @@ class GradeHandle:
                 "student_name": grade.student.user.first_name + ' ' + grade.student.user.last_name,
                 "grade": grade.mark,
                 "exam_date": grade.exam_date,
-                "id": grade.student.user.id
+                "id": grade.student.id,
+                "grade_id": grade.id,
             }
             if grade.type_exam == NameExam.MIDDLE:
                 middle.append(data)

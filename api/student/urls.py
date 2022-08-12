@@ -7,5 +7,5 @@ from api.student.views import (
 app_name = "api.student"
 
 urlpatterns = [
-    re_path(r"^$", GetListStudetnByClassView.as_view(), name="index")
+    re_path(r"^list$", GetListStudetnByClassView.as_view(), name="index")
 ]
