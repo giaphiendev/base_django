@@ -52,7 +52,6 @@ class PostGradeSerializer(serializers.Serializer):
     term = serializers.ChoiceField(choices=TermStatus.choices)
     exam_date = serializers.DateField()
 
-    teacher_id = serializers.IntegerField()
     subject_id = serializers.IntegerField()
     student_id = serializers.IntegerField()
 

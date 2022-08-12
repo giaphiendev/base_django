@@ -30,6 +30,7 @@ class GradeHandle:
                 "exam_date": grade.exam_date,
                 "id": grade.student.id,
                 "grade_id": grade.id,
+                "subject_id": grade.subject_id,
             }
             if grade.type_exam == NameExam.MIDDLE:
                 middle.append(data)
@@ -40,14 +41,17 @@ class GradeHandle:
         return [
             {
                 "exam_name": NameExam.ASSIGNMENT,
+                "term": term,
                 "grades": assignment,
             },
             {
                 "exam_name": NameExam.MIDDLE,
+                "term": term,
                 "grades": middle,
             },
             {
                 "exam_name": NameExam.FINAL,
+                "term": term,
                 "grades": final,
             },
         ]

@@ -141,6 +141,7 @@ class CreateGradeView(APIView):
     )
     @validate_body(PostGradeSerializer)
     def post(self, request, data):
+        data['teacher_id'] = request.user.id
         grade = GradeHandle().add_grade(data)
         serializer = GetGradeSerializer(grade).data
         data = {
