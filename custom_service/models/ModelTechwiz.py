@@ -142,8 +142,8 @@ class RevisionClass(TimeStampMixin):
 
 class TimeTable(TimeStampMixin):
     day_of_week = models.CharField(max_length=50, null=True, blank=True)
-    end_time = models.DateTimeField(null=True, blank=True)
-    start_time = models.DateTimeField(null=True, blank=True)
+    end_time = models.TimeField(null=True, blank=True)
+    start_time = models.TimeField(null=True, blank=True)
 
     revision_class = models.ForeignKey(RevisionClass, on_delete=models.SET_NULL, null=True,
                                        related_name="time_table_revision_class")

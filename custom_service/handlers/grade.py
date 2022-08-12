@@ -26,7 +26,8 @@ class GradeHandle:
             data = {
                 "student_name": grade.student.user.first_name + ' ' + grade.student.user.last_name,
                 "grade": grade.mark,
-                "exam_date": grade.exam_date
+                "exam_date": grade.exam_date,
+                "id": grade.student.user.id
             }
             if grade.type_exam == NameExam.MIDDLE:
                 middle.append(data)

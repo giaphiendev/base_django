@@ -18,3 +18,10 @@ class PutRevisionClassSerializer(serializers.Serializer):
     status = serializers.BooleanField(default=1)
     subject = serializers.IntegerField()
     teacher = serializers.IntegerField()
+
+
+class PutTimeTableSerializer(serializers.Serializer):
+    time_table_id = serializers.IntegerField()
+    day_of_week = serializers.IntegerField()
+    end_time = serializers.TimeField()
+    start_time = serializers.TimeField()
