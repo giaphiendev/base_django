@@ -37,9 +37,7 @@ class GetSubjectView(APIView):
         elif role == UserType.STUDENT:
             student = Student.objects.filter(user=request.user).select_related('my_class').first()
             list_subject = ClassTeacherSubject.objects.filter(my_class_id=student.my_class_id).select_related(
-                'subject').values_list(
-                'subject', flat=True
-            ).all()
+                'subject').values_list('subject_id', 'subject__name').all()
             data = []
             for item in list(set(list_subject)):
                 data.append({
