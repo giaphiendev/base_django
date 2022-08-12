@@ -83,10 +83,13 @@ class GradeHandle:
     def update_grade(self, data):
         '''
         arg:
-            data: {student: 123, exam: 123, mark: 10, *description: 'text'}
+            data: { grade_id: 123, mark: 10, *description: 'text'}
         return:
         '''
-        pass
+        grade = Grade.objects.filter(id=data.get('grade_id')).first()
+        grade.mark = data.get('mark')
+        grade.save()
+        return grade
         # try:
         #     stu = Student.objects.get(pk=data.get('student'))
         #     exam = Exam.objects.get(pk=data.get('exam'))

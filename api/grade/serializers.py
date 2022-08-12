@@ -44,6 +44,7 @@ class GetClassSubjectSerializer(serializers.Serializer):
 
 
 class PostGradeSerializer(serializers.Serializer):
+    grade_id = serializers.IntegerField(required=False)
     mark = serializers.FloatField()
     start_year = serializers.IntegerField(default=datetime.datetime.now().year)
     end_year = serializers.IntegerField(required=False)
