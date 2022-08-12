@@ -13,6 +13,7 @@ from .myClass import urls as myClass_urls
 from .helplines import urls as helpline_urls
 from .studyResource import urls as resource_urls
 from .revisionClass import urls as revision_urls
+from .student import urls as student_urls
 from .views import FeedBackView
 
 app_name = "api"
@@ -55,6 +56,7 @@ urlpatterns = (
         path("helplines/", include(helpline_urls, namespace="helplines")),
         path("studyresource/", include(resource_urls, namespace="resources")),
         path("revision/", include(revision_urls, namespace="revision")),
+        path("student/", include(student_urls, namespace="student")),
         re_path(r"^feedback$", FeedBackView.as_view(), name="feedback"),
     ]
 )
