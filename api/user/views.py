@@ -48,6 +48,13 @@ jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 class UserView(APIView):
     permission_classes = (IsAuthenticated,)
 
+    def get(self, request, ):
+        """update a new user."""
+        user = request.user
+
+        response = {"payload": GetUserSerializer(user).data}
+        return Response(response, status=200)
+
     @extend_schema(
         tags=["User"],
         request=RegisterSerializer,
