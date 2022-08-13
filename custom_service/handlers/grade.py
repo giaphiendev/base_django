@@ -1,10 +1,11 @@
 from datetime import datetime
+from django.db.models import Q, Avg
+from dateutil.relativedelta import relativedelta
 
 from core.exceptions import UserNotFound
 from core.models import User
 from custom_service.exceptions import StudentNotFound, SubjectNotFound
-from custom_service.models.ModelTechwiz import Grade, Student, Subject, NameExam, TermStatus, ClassTeacherSubject, \
-    MyClass
+from custom_service.models.ModelTechwiz import Grade, Student, Subject, NameExam, MyClass, ClassTeacherSubject
 
 
 class GradeHandle:
@@ -146,21 +147,6 @@ class GradeHandle:
         grade.description = data.get('description')
         grade.save()
         return grade
-        # try:
-        #     stu = Student.objects.get(pk=data.get('student'))
-        #     exam = Exam.objects.get(pk=data.get('exam'))
-        #
-        #     grade = Grade.objects.filter(student=stu, exam=exam).first()
-        #     grade.mark = data.get('mark')
-        #     grade.description = data.get('description')
-        #
-        #     grade.save()
-        # except Exam.DoesNotExist:
-        #     raise ExamNotFound('Exam not found')
-        # except Grade.DoesNotExist:
-        #     raise GradeNotFound('Grade not found')
-        # except Student.DoesNotExist:
-        #     raise StudentNotFound('Student not found')
 
     def get_input_grade(self, teacher_id):
         '''
@@ -182,8 +168,29 @@ class GradeHandle:
                 last_update: ''
             }
         '''
-        grade = Grade.objects.filter(created_by_id=teacher_id).order_by('-created_by').first()
 
+        grade1 = Grade.objects.filter(created_by_id=teacher_id).order_by('-created_by').first()
+
+        grade2 = Grade.objects.filter(created_by_id=teacher_id).filter(
+            ~Q(term=grade1.term) | ~Q(type_exam=grade1.type_exam) | ~Q(
+                student__my_class_id=grade1.student.my_class.id)).order_by(
+            '-created_by').first()
+
+        grade3 = Grade.objects.filter(created_by_id=teacher_id).filter(
+            ~Q(term__in=[grade1.term, grade2.term]) | ~Q(type_exam__in=[grade1.type_exam, grade2.type_exam]) | ~Q(
+                student__my_class_id__in=[grade1.student.my_class.id, grade2.student.my_class.id])).order_by(
+            '-created_by').first()
+
+        top_student = self.top_3_grade(teacher_id)
+        average_grades = self.average_grades_subject(teacher_id)
+
+        return {
+            "recentExams": [self.filter_exam(grade1), self.filter_exam(grade2), self.filter_exam(grade3)],
+            "top_student": top_student,
+            "average_grades": average_grades
+        }
+
+    def filter_exam(self, grade):
         if grade is None:
             return {}
 
@@ -195,7 +202,7 @@ class GradeHandle:
         list_student_id = Student.objects.filter(my_class_id=my_class.id).values_list('id', flat=True)
 
         list_student_has_grade = Grade.objects.filter(
-            created_by_id=teacher_id,
+            created_by_id=grade.created_by.id,
             type_exam=exam,
             start_year=grade.start_year,
             student_id__in=list_student_id
@@ -215,3 +222,64 @@ class GradeHandle:
             "last_update": last_update
         }
         return data
+
+    def top_3_grade(self, teacher_id):
+        if teacher_id is None:
+            return {}
+        last_month = datetime.now() - relativedelta(months=1)
+
+        top_grade = Grade.objects.filter(
+            created_by_id=teacher_id,
+            created_at__gte=last_month,
+        ).order_by('-mark') \
+            .select_related('student') \
+            .select_related('student__my_class') \
+            .select_related("student__user").values(
+            'id',
+            'student_id',
+            'student__user__first_name',
+            'student__user__last_name',
+            'mark',
+            'student__my_class__name',
+            'student__my_class__id',
+            'type_exam',
+            'term',
+        )[:3]
+
+        res = []
+        for student in top_grade:
+            res.append({
+                "grade_id": student.get('id'),
+                "student_id": student.get('student_id'),
+                "student_name": student.get('student__user__first_name') + " " + student.get(
+                    'student__user__first_name'),
+                "mark": student.get('mark'),
+                "class_id": student.get('student__my_class__id'),
+                "class_name": student.get('student__my_class__name'),
+                "type_exam": student.get('type_exam'),
+                "term": student.get('term'),
+            })
+
+        return res
+
+    def average_grades_subject(self, teacher_id):
+        """
+        get list subject
+        tinh average of each subject
+        return
+        """
+        list_subjects = Subject.objects.filter(
+            class_teacher_subject_subject__teacher_id=teacher_id
+        ).values_list('id', 'name').all()
+
+        res = []
+        for sub_id in set(list_subjects):
+            grade = Grade.objects.filter(subject_id=sub_id, created_by_id=teacher_id).values_list('mark', flat=True)
+            if len(grade) > 0:
+                res.append({
+                    "subject_id": sub_id[0],
+                    "subject_name": sub_id[1],
+                    "average_mark": round(sum(grade) / len(grade), 2)
+                })
+
+        return res

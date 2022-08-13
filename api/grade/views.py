@@ -182,9 +182,10 @@ class CreateGradeView(APIView):
         student_id = grade.student.id
         subject_name = grade.subject.name
         user_id = Student.objects.filter(id=student_id).first().user.id
+
         data_push_notification = {
             "message": f"A {subject_name}'s grade has been added",
-            "extra": {"create_at": datetime.datetime.now()},
+            "extra": {"created_at": datetime.datetime.now().date()},
             "user_id": user_id
         }
         send_notification_to_device_celery.delay(data_push_notification)

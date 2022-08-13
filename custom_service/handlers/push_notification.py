@@ -25,10 +25,11 @@ class PushNotificationHandle:
 
     # Basic arguments. You should extend this function with the push features you
     # want to use, or simply pass in a `PushMessage` object.
-    def send_push_message(self, token, message, extra=None):
+    def send_push_message(self, token, title, message, extra=None):
         try:
             push_message = PushMessage(
                 to=token,
+                title=title,
                 body=message,
                 data=extra
             )

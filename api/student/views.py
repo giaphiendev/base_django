@@ -37,5 +37,14 @@ class GetStudentIdFromParentView(APIView):
         role = request.user.role
         if role is None or role != UserType.PARENT:
             return Response({"payload": []}, status=200)
-        list_student = Student.objects.filter(parent_id=request.user.id).values_list('id', flat=True)
-        return Response({'payload': list_student}, status=200)
+        list_student = Student.objects.filter(parent_id=request.user.id).select_related('my_class').select_related(
+            'user').values('id', 'my_class__name', 'user__last_name', 'user__first_name', 'user__date_of_birth')
+        res = []
+        for item in list_student:
+            res.append({
+                "id": item['id'],
+                "class_name": item['my_class__name'],
+                "full_name": item['user__first_name'] + " " + item['user__last_name'],
+                "date_of_birth": item['user__date_of_birth'],
+            })
+        return Response({'payload': res}, status=200)
