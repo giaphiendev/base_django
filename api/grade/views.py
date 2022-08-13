@@ -1,15 +1,43 @@
+import datetime
+
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.grade.serializers import PostGradeSerializer, GetGradeSerializer, GetClassSubjectSerializer, \
-    GetSubjectSerializer
-from core.decorators import validate_body, map_exceptions
-from core.models import UserType
-from custom_service.errors import ERROR_STUDENT_NOT_FOUND, ERROR_GRADE_NOT_FOUND
+from api.grade.serializers import PostGradeSerializer, GetGradeSerializer, GetClassSubjectSerializer
+from core.decorators import map_exceptions
+from core.models import UserType, User
+from custom_service.errors import ERROR_STUDENT_NOT_FOUND
 from custom_service.exceptions import StudentNotFound
 from custom_service.handlers.grade import GradeHandle
-from custom_service.models.ModelTechwiz import ClassTeacherSubject, Student, Subject
+from custom_service.models.ModelTechwiz import ClassTeacherSubject, Student
+from custom_service.task import send_notification_to_device_celery
+
+
+class GetGradeView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        '''
+        get subject
+        arg:
+        '''
+        term = request.GET.get('term')
+        if term is None:
+            return Response({"payload": []}, status=200)
+        role = request.user.role
+        if role is None:
+            return Response({"payload": []}, status=200)
+
+        elif role == UserType.STUDENT:
+            student_id = Student.objects.filter(user_id=request.user.id).first().id
+            data_res = GradeHandle().get_grade_family(student_id, term)
+            return Response({"payload": data_res}, status=200)
+        elif role == UserType.PARENT:
+            student_id = request.GET.get('student_id')
+            data_res = GradeHandle().get_grade_family(student_id, term)
+            return Response({"payload": data_res}, status=200)
+        return Response({"payload": []}, status=200)
 
 
 class GetSubjectView(APIView):
@@ -112,7 +140,8 @@ class CreateGradeView(APIView):
 
     def get(self, request):
         '''
-        get all grade of class
+        get all grade of class for each role (student, )
+        nam hoc tinh tu 1/9 => 30/8
         arg:
             subject_id
             class_id
@@ -139,14 +168,27 @@ class CreateGradeView(APIView):
             StudentNotFound: ERROR_STUDENT_NOT_FOUND,
         }
     )
-    @validate_body(PostGradeSerializer)
-    def post(self, request, data):
+    # @validate_body(PostGradeSerializer)
+    def post(self, request):
+        data = request.data
         data['teacher_id'] = request.user.id
         if data.get('grade_id') is None:
             grade = GradeHandle().add_grade(data)
         else:
             grade = GradeHandle().update_grade(data)
         serializer = GetGradeSerializer(grade).data
+
+        # push_notification
+        student_id = grade.student.id
+        subject_name = grade.subject.name
+        user_id = Student.objects.filter(id=student_id).first().user.id
+        data_push_notification = {
+            "message": f"A {subject_name}'s grade has been added",
+            "extra": {"create_at": datetime.datetime.now()},
+            "user_id": user_id
+        }
+        send_notification_to_device_celery.delay(data_push_notification)
+
         data = {
             'payload': serializer
         }

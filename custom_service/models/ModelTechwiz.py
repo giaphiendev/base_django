@@ -153,3 +153,16 @@ class TimeTable(TimeStampMixin):
 
     def __str__(self):
         return f"TimeTable - {self.revision_class.status}"
+
+
+class DeviceTokenPushNotification(TimeStampMixin):
+    token = models.CharField(max_length=255, null=True, blank=True)
+    active = models.BooleanField(default=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,
+                             related_name="device_token_push_notification_user")
+
+    class Meta:
+        db_table = "device_token_push_notification"
+
+    def __str__(self):
+        return f"id - {self.id} - user: {self.user.username}"

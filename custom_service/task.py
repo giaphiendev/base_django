@@ -4,6 +4,8 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 
 from config.celery import app
+from custom_service.handlers.push_notification import PushNotificationHandle
+from custom_service.models.ModelTechwiz import DeviceTokenPushNotification
 
 logger = logging.getLogger("django")
 
@@ -64,3 +66,22 @@ def send_report_mark(data):
         recipient_list=[data.get('email', "hienaloso98@gmail.com")],
         fail_silently=False,
     )
+    logger.info(f"Send email about report card")
+
+
+@app.task()
+def send_notification_to_device_celery(data):
+    '''
+    send report about mark
+    arg:
+        data: {message: "message", extra: {}, user_id: 1}
+    '''
+    message = data.get('message')
+    extra = data.get('extra')
+    user_id = data.get('user_id')
+    all_token = DeviceTokenPushNotification.objects.filter(active=1, user_id=user_id).values_list('token', flat=True)
+
+    for token in all_token:
+        logger.info(f"start push notification: {token}")
+        PushNotificationHandle().send_push_message(token, message, extra=extra)
+    logger.info(f"end push notification: ")

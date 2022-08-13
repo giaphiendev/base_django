@@ -2,10 +2,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from core.models import UserType
 from custom_service.models.ModelTechwiz import Student
 
 
-class GetListStudetnByClassView(APIView):
+class GetListStudentByClassView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
@@ -27,3 +28,14 @@ class GetListStudetnByClassView(APIView):
             'list_user': list_student_res
         }
         return Response({'payload': data}, status=200)
+
+
+class GetStudentIdFromParentView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        role = request.user.role
+        if role is None or role != UserType.PARENT:
+            return Response({"payload": []}, status=200)
+        list_student = Student.objects.filter(parent_id=request.user.id).values_list('id', flat=True)
+        return Response({'payload': list_student}, status=200)

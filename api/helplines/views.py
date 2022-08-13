@@ -11,7 +11,7 @@ from utils.base_views import PaginationApiView
 
 
 class GetListHelpLinesView(PaginationApiView):
-    permission_classes = (AllowAny,) #IsAuthenticated
+    permission_classes = (IsAuthenticated,)  # IsAuthenticated
 
     def get(self, request):
         all_helplines = HelpLine.objects.all()

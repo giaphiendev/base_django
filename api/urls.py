@@ -14,7 +14,8 @@ from .helplines import urls as helpline_urls
 from .studyResource import urls as resource_urls
 from .revisionClass import urls as revision_urls
 from .student import urls as student_urls
-from .views import FeedBackView
+from .notification import urls as notification_urls
+from .views import FeedBackView,SendReportCardView
 
 app_name = "api"
 
@@ -57,6 +58,11 @@ urlpatterns = (
         path("studyresource/", include(resource_urls, namespace="resources")),
         path("revision/", include(revision_urls, namespace="revision")),
         path("student/", include(student_urls, namespace="student")),
+        # notification
+        path("notification/", include(notification_urls, namespace="notification")),
+        # send feedback
         re_path(r"^feedback$", FeedBackView.as_view(), name="feedback"),
+        # send email report card
+        re_path(r"^send-report-card$", SendReportCardView.as_view(), name="send_report_card"),
     ]
 )

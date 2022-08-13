@@ -107,10 +107,9 @@ class UserView(APIView):
 
         return Response(response)
 
-    @validate_body(UpdateUserSerializer)
-    def put(self, request, data):
+    def put(self, request):
         """update a new user."""
-
+        data = request.data
         user = UserHandler().update_user_multi_field(data)
 
         response = {"payload": GetUserSerializer(user).data}

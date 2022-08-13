@@ -7,7 +7,7 @@ from core.decorators import map_exceptions, validate_body
 from custom_service.errors import ERROR_POST_NOT_FOUND
 from custom_service.exceptions import PostNotFound
 from .crud import StudyResourceHandler
-from custom_service.models.ModelTechwiz import StudyResource
+from custom_service.models.ModelTechwiz import StudyResource, Subject
 from utils.base_views import PaginationApiView
 
 
@@ -28,8 +28,11 @@ class GetResource(PaginationApiView):
         }
         return Response(data, status=200)
 
-    @validate_body(PutResourceSerializer)
-    def post(self, request, data):
+    # @validate_body(PutResourceSerializer)
+    def post(self, request):
+        data = request.data
+        subject = Subject.objects.filter(id=data.get('subject')).first()
+        data["subject"] = subject
         resource = StudyResourceHandler().create_resource(data)
         resource_serializer = ResourceSerializer(resource).data
         data = {

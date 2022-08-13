@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from core.exceptions import UserNotFound
 from core.models import User
 from custom_service.exceptions import StudentNotFound, SubjectNotFound
@@ -56,6 +58,59 @@ class GradeHandle:
             },
         ]
 
+    def get_grade_family(self, student_id, term):
+        '''
+        arg:
+            student_id:
+            term: 1 # 2
+        return:
+        {
+            term1: [{subject_id: "", subject_name:"", mark: '', exam_date:"", }],
+            term2: [{subject_id: "", subject_name:"", mark: '', exam_date:"", }]
+        }
+
+        validate by start_year, end_year
+        1/9 => 30/8
+        '''
+        date_start_year = datetime(datetime.now().year, 9, 1).date()
+        # get list subject
+        if datetime.now().date() > date_start_year:
+            all_grade = Grade.objects.filter(student_id=student_id, start_year=datetime.now().year).select_related(
+                'subject').all()
+        else:
+            all_grade = Grade.objects.filter(student_id=student_id, end_year=datetime.now().year).select_related(
+                'subject').all()
+
+        term = 'TERM1' if int(term) == 1 else 'TERM2'
+
+        all_grade = all_grade.filter(term=term).all()
+        list_subject_id = []
+        for sub in all_grade:
+            list_subject_id.append((sub.subject.id, sub.subject.name))
+
+        list_subject_id = list(set(list_subject_id))
+        res = []
+        for each_sub in list_subject_id:
+            data = {
+                'subject_id': each_sub[0],
+                'subject_name': each_sub[1],
+            }
+            for grade in all_grade:
+                if grade.subject_id != each_sub[0]:
+                    continue
+                else:
+                    data['exam_date'] = grade.exam_date
+                    data['grade_id'] = grade.id
+                    if grade.type_exam == NameExam.ASSIGNMENT:
+                        data['ASSIGNMENT'] = grade.mark
+                    elif grade.type_exam == NameExam.MIDDLE:
+                        data['MIDDLE'] = grade.mark
+                    elif grade.type_exam == NameExam.FINAL:
+                        data['FINAL'] = grade.mark
+            res.append(data)
+
+        return res
+
     def add_grade(self, data):
         '''
         arg:
@@ -69,7 +124,6 @@ class GradeHandle:
             del data["teacher_id"]
             del data["student_id"]
             del data["subject_id"]
-            print('data: ', data)
             grade = Grade(created_by=created_by, subject=subject, student=student, **data)
             grade.save()
             return grade
@@ -88,6 +142,8 @@ class GradeHandle:
         '''
         grade = Grade.objects.filter(id=data.get('grade_id')).first()
         grade.mark = data.get('mark')
+        grade.exam_date = data.get('exam_date')
+        grade.description = data.get('description')
         grade.save()
         return grade
         # try:

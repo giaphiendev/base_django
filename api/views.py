@@ -20,3 +20,14 @@ class FeedBackView(APIView):
             send_feedback_by_email.delay(data)
             # send_report_mark.delay(data)
         return Response({"payload": None}, status=200)
+
+
+class SendReportCardView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        data = {
+            "email": "hiencoday363@yopmail.com"
+        }
+        send_report_mark.delay(data)
+        return Response({"payload": None}, status=200)

@@ -15,8 +15,9 @@ from core.exceptions import (
     PinNotExists,
     PinExpired, InvalidPassword
 )
-from core.models import User
+from core.models import User, UserType
 from core.users.handler import UserHandler
+from custom_service.models.ModelTechwiz import Student
 from utils import error
 from utils.logger import logger_raise_warn_exception
 
@@ -33,6 +34,34 @@ class GetAllFieldUserSerializer(serializers.ModelSerializer):
             "groups": {"write_only": True},
             "user_permissions": {"write_only": True},
         }
+
+    def to_representation(self, instance):
+        data = {
+            "id": instance.id,
+            "last_login": instance.last_login,
+            "first_name": instance.first_name,
+            "last_name": instance.last_name,
+            "username": instance.username,
+            "email": instance.email,
+            "phone": instance.phone,
+            "role": instance.role,
+            "avatar_url": instance.avatar_url,
+            "address": instance.address,
+            "date_of_birth": instance.date_of_birth,
+        }
+
+        if instance.role == UserType.STUDENT:
+            student = Student.objects.filter(user_id=instance.id).select_related('my_class').select_related(
+                'parent').first()
+            my_class = student.my_class
+            parent = student.parent
+            data['class_name'] = my_class.name
+            data['class_id'] = my_class.id
+            data['parent_id'] = parent.id
+            data['parent_name'] = parent.first_name + " " + parent.last_name
+            data['parent_email'] = parent.email
+            data['parent_phone'] = parent.phone
+        return data
 
 
 class CustomizeTokenObtainPairPatchedSerializer(TokenObtainPairSerializer):
@@ -57,16 +86,17 @@ class CustomizeTokenObtainPairPatchedSerializer(TokenObtainPairSerializer):
     def validate(self, request_data):
         user = UserHandler().get_user_by_password(request_data)
         refresh = self.get_token(user)
+        data = {
+            "user": GetAllFieldUserSerializer(user, many=False).data,
+            "refresh": str(refresh),
+            "refresh_expired": refresh.current_time + refresh.lifetime,
+            "access": str(refresh.access_token),
+            "access_token_expired": refresh.current_time + refresh.access_token.lifetime,
+        }
 
         return {
             "success": True,
-            "data": {
-                "user": GetAllFieldUserSerializer(user).data,
-                "refresh": str(refresh),
-                "refresh_expired": refresh.current_time + refresh.lifetime,
-                "access": str(refresh.access_token),
-                "access_token_expired": refresh.current_time + refresh.access_token.lifetime,
-            },
+            "data": data
         }
 
 
