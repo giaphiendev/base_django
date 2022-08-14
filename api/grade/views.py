@@ -178,21 +178,22 @@ class CreateGradeView(APIView):
             return Response({'payload': "You have no permission"}, status=400)
         if data.get('grade_id') is None:
             grade = GradeHandle().add_grade(data)
+
         else:
             grade = GradeHandle().update_grade(data)
+
         serializer = GetGradeSerializer(grade).data
 
-        # push_notification
+        # push_notification change mark
         student_id = grade.student.id
-        subject_name = grade.subject.name
 
         student = Student.objects.filter(id=student_id).first()
         user_id = student.user_id
         parent_id = student.parent_id
 
         data_push_notification = {
-            "title": f"A {subject_name}'s grade has been added",
-            "message": f"A {subject_name}'s grade has been added",
+            "title": f"Teacher {request.user.first_name} {request.user.last_name}",
+            "message": f"Grade create for {student.user.first_name} {student.user.last_name} {grade.subject.name} term {grade.term} {grade.type_exam} | 2021 - 2022",
             "extra": {"created_at": datetime.datetime.now().date()},
             "user_id": [user_id, parent_id]
         }

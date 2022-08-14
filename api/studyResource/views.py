@@ -43,7 +43,7 @@ class GetResource(PaginationApiView):
         resource = StudyResourceHandler().create_resource(data)
         resource_serializer = ResourceSerializer(resource).data
 
-        # add notification
+        # push_notification add resource
         class_teacher_subject = ClassTeacherSubject.objects.filter(
             subject_id=data.get('subject'),
             teacher_id=request.user.id
@@ -54,8 +54,8 @@ class GetResource(PaginationApiView):
         ).select_related('user').values_list('user_id', flat=True)
 
         data_push_notification = {
-            "title": f"A new resource has been added",
-            "message": f"A {resource_serializer.name}'s resource has been added",
+            "title": f"Teacher {request.user.first_name} {request.user.last_name} \n {resource.name}",
+            "message": f"A new study resource has been added for {subject.name} | 2021 - 2022",
             "extra": {"created_at": datetime.now()},
             "user_id": list(set(user_id))
         }

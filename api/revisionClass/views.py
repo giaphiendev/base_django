@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 
 from core.decorators import validate_body
 from core.models import UserType
-from custom_service.models.ModelTechwiz import Student, RevisionClass, ClassTeacherSubject
+from custom_service.models.ModelTechwiz import Student, RevisionClass, ClassTeacherSubject, Subject
 from .crud import RevisionHandler
 from .serializers import PutTimeTableSerializer
 from custom_service.task import send_notification_to_device_celery
@@ -43,13 +43,14 @@ class UpdateTimeTableView(APIView):
         # validate here
         RevisionHandler().update_revision(time_table_id, data)
 
-        # add notification
+        # push_notification update revision class
         sub_id = RevisionClass.objects.filter(
             time_table_revision_class__id=time_table_id
         ).select_related('subject').values_list(
             'subject_id',
             flat=True
         )[:1]
+        subject = Subject.objects.filter(id=sub_id[0]).first()
 
         class_teacher_subject = ClassTeacherSubject.objects.filter(
             subject_id=sub_id[0]
@@ -60,8 +61,8 @@ class UpdateTimeTableView(APIView):
         ).select_related('user').values_list('user_id', flat=True)
 
         data_push_notification = {
-            "title": f"Time table has been added",
-            "message": f"Time table has been added",
+            "title": f"Teacher {request.user.first_name} {request.user.last_name} \n Revision class schedule",
+            "message": f"{subject.name}’s revision class schedule has been changed",
             "extra": {"created_at": datetime.now()},
             "user_id": list(set(user_id))
         }

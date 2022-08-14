@@ -51,7 +51,7 @@ def send_feedback_by_email(data):
     content = render_to_string(template_mail_invite, context)
     send_mail(
         subject="FEEDBACK",
-        message=f"FEEDBACK",
+        message=f"title: {data.get('title')} - content: {data.get('content')}",
         html_message=content,
         from_email=settings.FROM_EMAIL,
         recipient_list=[data.get('email')],

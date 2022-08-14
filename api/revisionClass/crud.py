@@ -44,8 +44,9 @@ class RevisionHandler:
         list_time_table = RevisionClass.objects.filter(
             status=1,
             subject__in=list_subject
-        ).prefetch_related('time_table_revision_class'
-                           ).values_list(
+        ).prefetch_related(
+            'time_table_revision_class'
+        ).values_list(
             "subject__id",
             'subject__name',
             "teacher__last_name",
@@ -68,6 +69,8 @@ class RevisionHandler:
                     "id": time_table[7],
                 }
             }
+            if data['id_subject'] is None or data['time_table']['id'] is None:
+                continue
             list_time_table_res.append(data)
 
         return list_time_table_res
