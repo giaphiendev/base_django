@@ -44,12 +44,21 @@ class UpdateTimeTableView(APIView):
         RevisionHandler().update_revision(revision_id, data)
 
         # add notification
-        sub_id = RevisionClass.objects.filter(id=revision_id).select_related('subject').values_list('subject_id',
-                                                                                                    flat=True)[:1]
-        class_teacher_subject = ClassTeacherSubject.objects.filter(subject_id=sub_id[0]).values_list(
-            'my_class_id', flat=True)
-        user_id = Student.objects.filter(my_class_id__in=class_teacher_subject).select_related('user').values_list(
-            'user_id', flat=True)
+        sub_id = RevisionClass.objects.filter(
+            id=revision_id
+        ).select_related('subject').values_list(
+            'subject_id',
+            flat=True
+        )[:1]
+
+        class_teacher_subject = ClassTeacherSubject.objects.filter(
+            subject_id=sub_id[0]
+        ).values_list('my_class_id', flat=True)
+
+        user_id = Student.objects.filter(
+            my_class_id__in=class_teacher_subject
+        ).select_related('user').values_list('user_id', flat=True)
+
         data_push_notification = {
             "title": f"Time table has been added",
             "message": f"Time table has been added",

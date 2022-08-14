@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 
 from api.studyResource.serializers import ResourceSerializer, PutResourceSerializer
 from core.decorators import map_exceptions, validate_body
+from core.models import UserType
 from custom_service.errors import ERROR_POST_NOT_FOUND
 from custom_service.exceptions import PostNotFound
 from .crud import StudyResourceHandler
@@ -33,6 +34,9 @@ class GetResource(PaginationApiView):
 
     # @validate_body(PutResourceSerializer)
     def post(self, request):
+        role = request.user.role
+        if role != UserType.TEACHER:
+            return Response({'payload': "You have no permission!"}, status=200)
         data = request.data
         subject = Subject.objects.filter(id=data.get('subject')).first()
         data["subject"] = subject
@@ -40,10 +44,14 @@ class GetResource(PaginationApiView):
         resource_serializer = ResourceSerializer(resource).data
 
         # add notification
-        class_teacher_subject = ClassTeacherSubject.objects.filter(subject_id=data.get('subject')).values_list(
-            'my_class_id', flat=True)
-        user_id = Student.objects.filter(my_class_id__in=class_teacher_subject).select_related('user').values_list(
-            'user_id', flat=True)
+        class_teacher_subject = ClassTeacherSubject.objects.filter(
+            subject_id=data.get('subject'),
+            teacher_id=request.user.id
+        ).values_list('my_class_id', flat=True)
+
+        user_id = Student.objects.filter(
+            my_class_id__in=class_teacher_subject
+        ).select_related('user').values_list('user_id', flat=True)
 
         data_push_notification = {
             "title": f"A new resource has been added",
