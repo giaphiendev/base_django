@@ -151,7 +151,8 @@ def send_notification_to_device_celery(data):
         for token in all_token:
             if token is not None:
                 PushNotificationHandle().send_push_message(token, title, message, extra=extra)
-        logger.info(f"end push notification: ")
+                logger.info(f"pushed to token: {token}")
+        logger.info(f"end push notification")
     else:
         for id in user_id:
             all_token = DeviceTokenPushNotification.objects.filter(
@@ -161,5 +162,7 @@ def send_notification_to_device_celery(data):
 
             logger.info(f"start push notification")
             for token in all_token:
-                PushNotificationHandle().send_push_message(token, title, message, extra=extra)
-            logger.info(f"end push notification: ")
+                if token is not None:
+                    PushNotificationHandle().send_push_message(token, title, message, extra=extra)
+                    logger.info(f"pushed to token: {token}")
+            logger.info(f"end push notification")

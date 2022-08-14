@@ -45,7 +45,13 @@ class PushNotificationHandle:
                     'errors': exc.errors,
                     'response_data': exc.response_data,
                 })
-            logger.info(f"PushServerError")
+            logger.error(f"PushServerError: ", {
+                    'token': token,
+                    'message': message,
+                    'extra': extra,
+                    'errors': exc.errors,
+                    'response_data': exc.response_data,
+                })
             raise
         except (ConnectionError, HTTPError) as exc:
             # Encountered some Connection or HTTP error - retry a few times in
@@ -53,7 +59,7 @@ class PushNotificationHandle:
             rollbar.report_exc_info(
                 extra_data={'token': token, 'message': message, 'extra': extra})
 
-            logger.info(f"(ConnectionError, HTTPError)")
+            logger.error(f"ConnectionError, HTTPError: ", exc)
             raise self.retry(exc=exc)
 
         try:
@@ -61,11 +67,11 @@ class PushNotificationHandle:
             # This call raises errors so we can handle them with normal exception
             # flows.
             response.validate_response()
-            logger.info(f"(ConnectionError, HTTPError)")
+            logger.info(f"validate_response ss")
         except DeviceNotRegisteredError:
             # Mark the push token as inactive
             DeviceTokenPushNotification.objects.filter(token=token).update(active=False)
-            logger.info(f"check token again")
+            logger.error(f"DeviceNotRegisteredError")
         except PushTicketError as exc:
             # Encountered some other per-notification error.
             rollbar.report_exc_info(
@@ -75,5 +81,5 @@ class PushNotificationHandle:
                     'extra': extra,
                     'push_response': exc.push_response._asdict(),
                 })
-            logger.info(f"PushTicketError: {exc}")
+            logger.error(f"PushTicketError: {exc}")
             raise self.retry(exc=exc)
