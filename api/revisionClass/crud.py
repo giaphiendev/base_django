@@ -72,11 +72,9 @@ class RevisionHandler:
 
         return list_time_table_res
 
-    def update_revision(self, revision_id, data):
+    def update_revision(self, time_table_id, data):
         """
         arg:
             data: {time_table_id: 1, day_of_week: 'monday', end_time: '', start_time: ''}
         """
-        time_id = data.get('time_table_id')
-        del data['time_table_id']
-        TimeTable.objects.filter(id=time_id).update(**data)
+        TimeTable.objects.filter(id=time_table_id).update(**data)

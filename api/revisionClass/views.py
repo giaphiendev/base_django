@@ -35,17 +35,17 @@ class UpdateTimeTableView(APIView):
     permission_classes = (IsAuthenticated,)
 
     # @validate_body(PutTimeTableSerializer)
-    def put(self, request, revision_id):
+    def put(self, request, time_table_id):
         data = request.data
         role = request.user.role
         if role is None or role != UserType.TEACHER:
             return Response({'error': {"message": "You have no permission to go"}}, status=200)
         # validate here
-        RevisionHandler().update_revision(revision_id, data)
+        RevisionHandler().update_revision(time_table_id, data)
 
         # add notification
         sub_id = RevisionClass.objects.filter(
-            id=revision_id
+            time_table_revision_class__id=time_table_id
         ).select_related('subject').values_list(
             'subject_id',
             flat=True

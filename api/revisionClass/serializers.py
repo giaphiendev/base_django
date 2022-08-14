@@ -21,7 +21,7 @@ class PutRevisionClassSerializer(serializers.Serializer):
 
 
 class PutTimeTableSerializer(serializers.Serializer):
-    time_table_id = serializers.IntegerField()
+    # time_table_id = serializers.IntegerField()
     day_of_week = serializers.IntegerField()
     end_time = serializers.TimeField()
     start_time = serializers.TimeField()

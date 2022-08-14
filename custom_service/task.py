@@ -149,7 +149,8 @@ def send_notification_to_device_celery(data):
 
         logger.info(f"start push notification")
         for token in all_token:
-            PushNotificationHandle().send_push_message(token, title, message, extra=extra)
+            if token is not None:
+                PushNotificationHandle().send_push_message(token, title, message, extra=extra)
         logger.info(f"end push notification: ")
     else:
         for id in user_id:
