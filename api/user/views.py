@@ -168,9 +168,10 @@ class ForgotPasswordView(APIView):
             UserNotFound: ERROR_USER_NOT_FOUND,
         }
     )
-    @validate_body(ForgotPasswordBodyValidationSerializer)
-    def post(self, request, data):
+    # @validate_body(ForgotPasswordBodyValidationSerializer)
+    def post(self, request):
         """Changes the user's password if forgot."""
+        data = request.data
         serializer = self.serializer_class(data=data)
         if serializer.is_valid(raise_exception=True):
             handler = UserHandler()

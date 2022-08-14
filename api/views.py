@@ -17,10 +17,11 @@ class FeedBackView(APIView):
 
     @validate_body(FeedBackSerializer)
     def post(self, request, data):
+        email_dev = "hiencoday363@yopmail.com"
         serializer = self.serializer_class(data=data)
         if serializer.is_valid(raise_exception=True):
             data = serializer.data
-            data['email'] = "hiencoday363@yopmail.com"
+            data['email'] = email_dev
             send_feedback_by_email.delay(data)
         return Response({"payload": None}, status=200)
 

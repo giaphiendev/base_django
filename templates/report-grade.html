@@ -17,9 +17,13 @@
         }
     </style>
     <div>
+
+        <div style="border-bottom:1px solid #eee">
+            <a href="#" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">FPT-HANOI</a>
+        </div>
         <h2>Report card - {{ full_name }}</h2>
         <div>
-            <h4>
+            <h4 style="text-align: center;color: #fd3667">
                 TERM 1
             </h4>
 
@@ -33,23 +37,27 @@
                 </tr>
                 {% for item in term1 %}
                     <tr>
-                        <td>{{ item.subject_name }}</td>
+                        <td style="color: #473f97">
+                            <strong>
+                                {{ item.subject_name }}
+                            </strong>
+                        </td>
                         <td>{{ item.ASSIGNMENT }}</td>
                         <td>{{ item.MIDDLE }}</td>
                         <td>{{ item.FINAL }}</td>
-                        <td>{{ item.AVG }}</td>
+                        <td><strong>{{ item.AVG }}</strong></td>
                     </tr>
                 {% endfor %}
 
             </table>
 
             <div style="display: flex;justify-content: space-between">
-                <span>GPA</span>
-                <span>{{ gpa1 }}</span>
+                <span><strong>GPA</strong></span>
+                <span><strong>{{ gpa1 }}</strong></span>
             </div>
         </div>
         <div style="margin-top: 30px">
-            <h4>
+            <h4 style="text-align: center;color: #fd3667">
                 TERM 2
             </h4>
 
@@ -63,20 +71,27 @@
                 </tr>
                 {% for item in term2 %}
                     <tr>
-                        <td>{{ item.subject_name }}</td>
+                        <td>
+                            <strong>
+                                {{ item.subject_name }}
+                            </strong>
+                        </td>
                         <td>{{ item.ASSIGNMENT }}</td>
                         <td>{{ item.MIDDLE }}</td>
                         <td>{{ item.FINAL }}</td>
-                        <td>{{ item.AVG }}</td>
+                        <td><strong>{{ item.AVG }}</strong></td>
                     </tr>
                 {% endfor %}
 
             </table>
             <div style="display: flex;justify-content: space-between">
-                <span>GPA</span>
-                <span>{{ gpa2 }}</span>
+                <span><strong>GPA</strong></span>
+                <span><strong>{{ gpa2 }}</strong></span>
             </div>
         </div>
-
+        <div style="float:right;padding:8px 0;color:#aaa;font-size:0.8em;line-height:1;font-weight:300">
+            <p>8 Ton That Thuyet, Ha Noi, Viet Nam</p>
+            <p>FPT - HANOI, VIETNAM</p>
+        </div>
     </div>
 {% endautoescape %}

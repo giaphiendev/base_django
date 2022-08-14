@@ -57,10 +57,11 @@ class GetAllFieldUserSerializer(serializers.ModelSerializer):
             parent = student.parent
             data['class_name'] = my_class.name
             data['class_id'] = my_class.id
-            data['parent_id'] = parent.id
-            data['parent_name'] = parent.first_name + " " + parent.last_name
-            data['parent_email'] = parent.email
-            data['parent_phone'] = parent.phone
+            if parent:
+                data['parent_id'] = parent.id
+                data['parent_name'] = parent.first_name + " " + parent.last_name
+                data['parent_email'] = parent.email
+                data['parent_phone'] = parent.phone
         return data
 
 

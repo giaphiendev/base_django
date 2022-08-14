@@ -9,6 +9,7 @@ class RevisionHandler:
             teacher_id=teacher_id
         ).prefetch_related('time_table_revision_class'
                            ).values_list(
+            "subject__id",
             'subject__name',
             "teacher__last_name",
             "teacher__first_name",
@@ -20,13 +21,14 @@ class RevisionHandler:
         list_time_table_res = []
         for time_table in list_time_table:
             list_time_table_res.append({
-                "name_subject": time_table[0],
-                "name_teacher": time_table[1] + " " + time_table[2],
+                "id_subject": time_table[0],
+                "name_subject": time_table[1],
+                "name_teacher": time_table[2] + " " + time_table[3],
                 "time_table": {
-                    "day_of_week": time_table[3],
-                    "time_start": time_table[4],
-                    "time_end": time_table[5],
-                    "id": time_table[6],
+                    "day_of_week": time_table[4],
+                    "time_start": time_table[5],
+                    "time_end": time_table[6],
+                    "id": time_table[7],
                 }
             })
 

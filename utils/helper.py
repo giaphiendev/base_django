@@ -4,10 +4,13 @@ fin_weight = 0.5
 
 
 def weight_average(list_nums, list_weights):
+    weight_sum = 0
     res = 0
     for i in range(len(list_nums)):
         res += list_nums[i] * list_weights[i]
-    return round(res, 2)
+        weight_sum += list_weights[i]
+
+    return round(res / weight_sum, 1)
 
 
 def cal_avg_grade(obj_grade):
@@ -30,9 +33,7 @@ def cal_avg_grade(obj_grade):
 
 
 def cal_gpa(list_obj_grade):
-    if not list_obj_grade[0].get("AVG"):
-        return 0
     res = 0
     for item in list_obj_grade:
         res += item.get('AVG')
-    return round(res / len(list_obj_grade), 2)
+    return round(res / len(list_obj_grade), 1)

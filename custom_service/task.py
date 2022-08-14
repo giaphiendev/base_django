@@ -29,7 +29,7 @@ def send_email_from_celery(data):
         message=f"OTP CODE",
         html_message=content,
         from_email=settings.FROM_EMAIL,
-        recipient_list=[data.get('email', "hienaloso98@gmail.com")],
+        recipient_list=[data.get('email')],
         fail_silently=False,
     )
 
@@ -42,12 +42,27 @@ def send_feedback_by_email(data):
     arg:
         data: {title: "admin@admin.com", content: 123123}
     '''
-    logger.info(f"Start send feed")
+
+    template_mail_invite = "feedback.html"
+    context = {
+        "title": data.get('title'),
+        "content": data.get('content'),
+    }
+    content = render_to_string(template_mail_invite, context)
+    send_mail(
+        subject="FEEDBACK",
+        message=f"FEEDBACK",
+        html_message=content,
+        from_email=settings.FROM_EMAIL,
+        recipient_list=[data.get('email')],
+        fail_silently=False,
+    )
+
     send_mail(
         subject=data.get('title', "title"),
         message=data.get('content', "content"),
         from_email=settings.FROM_EMAIL,
-        recipient_list=[data.get('title', "hienaloso98@gmail.com")],
+        recipient_list=[data.get('email')],
         fail_silently=False,
     )
     logger.info(f"Send feed successful!")
@@ -85,7 +100,7 @@ def send_report_mark(data):
         message=f"REPORT CARD",
         html_message=content,
         from_email=settings.FROM_EMAIL,
-        recipient_list=[data.get('email', "hienaloso98@gmail.com")],
+        recipient_list=[data.get('email')],
         fail_silently=False,
     )
     logger.info(f"Send email about report card")
@@ -109,7 +124,7 @@ def send_info_revision_class(data):
         message=f"Info revision",
         html_message=content,
         from_email=settings.FROM_EMAIL,
-        recipient_list=[data.get('email', "hienaloso98@gmail.com")],
+        recipient_list=[data.get('email')],
         fail_silently=False,
     )
     logger.info(f"Send email about report card")
