@@ -3,7 +3,7 @@ import datetime
 from rest_framework import serializers
 
 from core.models import UserType
-from custom_service.models.ModelTechwiz import NameExam, TermStatus, Grade, ClassTeacherSubject, Subject
+from custom_service.models.ModelTechwiz import NameExam, TermStatus, Grade, ClassTeacherSubject, Subject, Student
 
 
 class GetGradeSerializer(serializers.ModelSerializer):
@@ -31,6 +31,8 @@ class GetClassSubjectSerializer(serializers.Serializer):
                     'name': instance.subject.name,
                 },
             }
+
+        total_student = Student.objects.filter(my_class_id=instance.my_class.id).count()
         return {
             'class': {
                 'id': instance.my_class.id,
@@ -40,6 +42,7 @@ class GetClassSubjectSerializer(serializers.Serializer):
                 'id': instance.subject.id,
                 'name': instance.subject.name,
             },
+            "total_student": total_student
         }
 
 

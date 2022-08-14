@@ -90,7 +90,8 @@ class GetInputGradeView(APIView):
         if role is None or role != UserType.TEACHER:
             return Response({"payload": []}, status=200)
 
-        data_res = GradeHandle().get_input_grade(request.user.id)
+        # data_res = GradeHandle().get_input_grade(request.user.id)
+        data_res = GradeHandle().recent_grade(request.user.id)
         return Response({"payload": data_res}, status=200)
 
 

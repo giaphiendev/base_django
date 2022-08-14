@@ -1,5 +1,5 @@
 from datetime import datetime
-from django.db.models import Q, Avg
+from django.db.models import Q
 from dateutil.relativedelta import relativedelta
 
 from core.exceptions import UserNotFound
@@ -126,6 +126,7 @@ class GradeHandle:
             del data["student_id"]
             del data["subject_id"]
             grade = Grade(created_by=created_by, subject=subject, student=student, **data)
+            grade.updated_at = datetime.now()
             grade.save()
             return grade
         except User.DoesNotExist:
@@ -169,17 +170,17 @@ class GradeHandle:
             }
         '''
 
-        grade1 = Grade.objects.filter(created_by_id=teacher_id).order_by('-created_by').first()
+        grade1 = Grade.objects.filter(created_by_id=teacher_id).order_by('-updated_at').first()
 
         grade2 = Grade.objects.filter(created_by_id=teacher_id).filter(
             ~Q(term=grade1.term) | ~Q(type_exam=grade1.type_exam) | ~Q(
                 student__my_class_id=grade1.student.my_class.id)).order_by(
-            '-created_by').first()
+            '-updated_at').first()
 
         grade3 = Grade.objects.filter(created_by_id=teacher_id).filter(
             ~Q(term__in=[grade1.term, grade2.term]) | ~Q(type_exam__in=[grade1.type_exam, grade2.type_exam]) | ~Q(
                 student__my_class_id__in=[grade1.student.my_class.id, grade2.student.my_class.id])).order_by(
-            '-created_by').first()
+            '-updated_at').first()
 
         top_student = self.top_3_grade(teacher_id)
         average_grades = self.average_grades_subject(teacher_id)
@@ -204,9 +205,14 @@ class GradeHandle:
         list_student_has_grade = Grade.objects.filter(
             created_by_id=grade.created_by.id,
             type_exam=exam,
+            term=grade.term,
             start_year=grade.start_year,
-            student_id__in=list_student_id
+            student_id__in=list_student_id,
         ).count()
+
+        if list_student_has_grade >= len(list_student_id):
+            return None
+
         data = {
             "class": {
                 "name": my_class.name,
@@ -232,9 +238,9 @@ class GradeHandle:
             created_by_id=teacher_id,
             created_at__gte=last_month,
         ).order_by('-mark') \
-            .select_related('student') \
-            .select_related('student__my_class') \
-            .select_related("student__user").values(
+                        .select_related('student') \
+                        .select_related('student__my_class') \
+                        .select_related("student__user").values(
             'id',
             'student_id',
             'student__user__first_name',
@@ -283,3 +289,77 @@ class GradeHandle:
                 })
 
         return res
+
+    def recent_grade(self, teacher_id):
+        top_student = self.top_3_grade(teacher_id)
+        average_grades = self.average_grades_subject(teacher_id)
+
+        # start get recent
+        last_5_days = datetime.now() - relativedelta(days=5)
+        init_list_grades = Grade.objects.filter(
+            created_by_id=teacher_id,
+            created_at__gte=last_5_days
+        ).order_by('-created_at').select_related('student').all()
+
+        if len(init_list_grades) <= 0:
+            return {
+                "recentExams": [],
+                "top_student": top_student,
+                "average_grades": average_grades
+            }
+
+        list_mark_need = []
+        list_class_id_ignore = []
+
+        for grade in init_list_grades:
+            if len(list_mark_need) >= 3:
+                break
+            # find the latest student
+            term = grade.term
+            exam = grade.type_exam
+            subject = grade.subject
+            latest_student = grade.student
+
+            if latest_student.my_class.id in list_class_id_ignore:
+                continue
+            # find class
+            my_class = MyClass.objects.filter(id=latest_student.my_class.id).first()
+            list_student = list(set(Student.objects.filter(my_class_id=my_class.id).values_list('id', flat=True)))
+
+            # get list grade to check the student in class is full mark by term, exam
+            count_grade = Grade.objects.filter(
+                type_exam=exam,
+                term=term,
+                subject=subject,
+                student_id__in=list_student
+            ).count()
+
+            if count_grade < len(list_student):
+                data = {
+                    "class": {
+                        "name": my_class.name,
+                        "id": my_class.id,
+                    },
+                    "subject": {
+                        "name": subject.name,
+                        "id": subject.id,
+                    },
+                    "total_student": len(list_student),
+                    "has_grade_student": count_grade,
+                    "exam": exam,
+                    "term": term,
+                    "last_update": grade.created_at
+                }
+                list_mark_need.append(data)
+            else:
+                list_class_id_ignore.append(my_class.id)
+
+            # print('list_mark_need: ', list_mark_need)
+            # print('list_class_id_ignore: ', list_class_id_ignore)
+            # return
+
+        return {
+            "recentExams": list_mark_need,
+            "top_student": top_student,
+            "average_grades": average_grades
+        }
