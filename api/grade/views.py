@@ -184,6 +184,7 @@ class CreateGradeView(APIView):
         user_id = Student.objects.filter(id=student_id).first().user.id
 
         data_push_notification = {
+            "title": f"A {subject_name}'s grade has been added",
             "message": f"A {subject_name}'s grade has been added",
             "extra": {"created_at": datetime.datetime.now().date()},
             "user_id": user_id

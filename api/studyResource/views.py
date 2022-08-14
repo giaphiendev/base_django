@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -7,8 +9,9 @@ from core.decorators import map_exceptions, validate_body
 from custom_service.errors import ERROR_POST_NOT_FOUND
 from custom_service.exceptions import PostNotFound
 from .crud import StudyResourceHandler
-from custom_service.models.ModelTechwiz import StudyResource, Subject
+from custom_service.models.ModelTechwiz import StudyResource, Subject, Student, ClassTeacherSubject
 from utils.base_views import PaginationApiView
+from custom_service.task import send_notification_to_device_celery
 
 
 class GetResource(PaginationApiView):
@@ -35,6 +38,21 @@ class GetResource(PaginationApiView):
         data["subject"] = subject
         resource = StudyResourceHandler().create_resource(data)
         resource_serializer = ResourceSerializer(resource).data
+
+        # add notification
+        class_teacher_subject = ClassTeacherSubject.objects.filter(subject_id=data.get('subject')).values_list(
+            'my_class_id', flat=True)
+        user_id = Student.objects.filter(my_class_id__in=class_teacher_subject).select_related('user').values_list(
+            'user_id', flat=True)
+
+        data_push_notification = {
+            "title": f"A new resource has been added",
+            "message": f"A {resource_serializer.name}'s resource has been added",
+            "extra": {"created_at": datetime.now()},
+            "user_id": list(set(user_id))
+        }
+        send_notification_to_device_celery.delay(data_push_notification)
+
         data = {
             'data': resource_serializer
         }

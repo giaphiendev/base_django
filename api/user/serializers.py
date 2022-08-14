@@ -2,7 +2,7 @@ from django.contrib.auth.models import update_last_login
 from rest_framework import serializers
 from rest_framework_jwt.serializers import JSONWebTokenSerializer
 
-from core.models import User
+from core.models import User, UserPin
 from core.users.handler import UserHandler
 from core.users.utils import normalize_email_address
 from utils import error
@@ -65,13 +65,14 @@ class ForgotPasswordBodyValidationSerializer(serializers.Serializer):
     new_password = serializers.CharField(required=True, validators=[password_validation])
 
     def validate(self, attrs):
-        code = UserHandler().get_pin(attrs)
         required_fields = ['email', 'new_password', 'pin', 'token']
         for field in required_fields:
             if self.initial_data.get(field, None) is None:
                 logger_raise_warn_exception(field, error.RequireValue, detail=f"{field} is require")
             attrs[f'{field}'] = self.initial_data.get(field)
-        attrs['code'] = code
+
+        user_pin = UserHandler().get_pin(attrs)
+        attrs['user_pin'] = user_pin
         return attrs
 
 

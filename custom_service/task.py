@@ -15,16 +15,24 @@ logger = logging.getLogger("django")
 def send_email_from_celery(data):
     '''
     arg:
-        data: {mail: "admin@admin.com", pin: 123123}
+        data: {email: "admin@admin.com", pin: 123123}
     '''
-    logger.info(f"message from logger: {data.get('pin')}")
+
+    template_mail_invite = "send-otp.html"
+    context = {
+        "pin_code": data.get('pin'),
+        "full_name": data.get('email').split('@')[0],
+    }
+    content = render_to_string(template_mail_invite, context)
     send_mail(
-        subject="PIN CODE",
-        message=f"Here is your OTP {data.get('pin')} to sign up",
+        subject="OTP CODE",
+        message=f"OTP CODE",
+        html_message=content,
         from_email=settings.FROM_EMAIL,
-        recipient_list=[data.get("email")],
+        recipient_list=[data.get('email', "hienaloso98@gmail.com")],
         fail_silently=False,
     )
+
     logger.info(f"message from ss: {data.get('email')}")
 
 
@@ -53,7 +61,7 @@ def send_report_mark(data):
         data: {email: "admin@admin.com", **data}
     '''
 
-    template_mail_invite = "info-class.html"
+    template_mail_invite = "report-grade.html"
 
     data_term1 = data.get('term1')
     data_term2 = data.get('term2')
@@ -69,6 +77,7 @@ def send_report_mark(data):
         "term2": data_term2,
         "gpa1": cal_gpa(data_term1),
         "gpa2": cal_gpa(data_term2),
+        "full_name": data.get('full_name'),
     }
     content = render_to_string(template_mail_invite, context)
     send_mail(
@@ -92,13 +101,12 @@ def send_info_revision_class(data):
 
     template_mail_invite = "info-class.html"
     context = {
-        "invitation_url": 'invitation_url',
-        "logo_url": 'logo_url',
+        "list_time_table_res": data.get('list_time_table_res', []),
     }
     content = render_to_string(template_mail_invite, context)
     send_mail(
-        subject="Invite",
-        message=f"message",
+        subject="Info revision",
+        message=f"Info revision",
         html_message=content,
         from_email=settings.FROM_EMAIL,
         recipient_list=[data.get('email', "hienaloso98@gmail.com")],

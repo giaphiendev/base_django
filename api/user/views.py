@@ -39,6 +39,7 @@ from core.exceptions import (
     BaseURLHostnameNotAllowed, PinExpired, PinNotExists
 )
 from core.jwt import user_data_registry
+from core.models import UserPin
 from core.users.handler import UserHandler
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
@@ -164,6 +165,7 @@ class ForgotPasswordView(APIView):
             InvalidPassword: ERROR_INVALID_OLD_PASSWORD,
             PinExpired: PIN_EXPIRED,
             PinNotExists: PIN_NOT_EXISTS,
+            UserNotFound: ERROR_USER_NOT_FOUND,
         }
     )
     @validate_body(ForgotPasswordBodyValidationSerializer)
@@ -175,6 +177,10 @@ class ForgotPasswordView(APIView):
             handler.create_new_password(
                 serializer.data.get('email'), serializer.data.get('new_password')
             )
+            UserPin.objects.get(
+                code=serializer.data.get("pin", ""),
+                device_token=serializer.data.get("token", "")
+            ).delete()
 
             return Response({"payload": None}, status=200)
 

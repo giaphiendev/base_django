@@ -270,13 +270,13 @@ class UserHandler:
         try:
             user = User.objects.get(email=email)
             validate_password(new_password, user)
+
+            user.set_password(new_password)
+            user.save()
         except User.DoesNotExist:
             raise UserNotFound('User not found')
         except ValidationError as e:
             raise PasswordDoesNotMatchValidation(e.messages)
-
-        user.set_password(new_password)
-        user.save()
 
     def change_password(self, user, old_password, new_password):
         """
@@ -372,8 +372,8 @@ class UserHandler:
                 raise PinExpired('Pin expired')
         except UserPin.DoesNotExist:
             raise PinNotExists('Pin not exists')
-        if delete_pin:
-            UserPin.objects.get(code=data.get("pin", ""), device_token=data.get("token", "")).delete()
+        # if delete_pin:
+        #     UserPin.objects.get(code=data.get("pin", ""), device_token=data.get("token", "")).delete()
         return pin
 
     def get_super_user_by_email(self, email):

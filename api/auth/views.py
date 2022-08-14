@@ -42,8 +42,14 @@ class CustomSignupPinView(APIView):
     permission_classes = ([AllowAny])
 
     def get(self, request):
+        email = request.GET.get("email")
+        if email is None:
+            return Response({'error': 'missing email'}, status=400)
         pin = UserPin().generate_pin_sign_up()
-        data = {'email': 'hiencoday363@yopmail.com', 'pin': pin.code}
+        data = {
+            'email': email,  # 'hiencoday363@yopmail.com',
+            'pin': pin.code
+        }
         send_email_from_celery.delay(data)
         response = {
             "result": "success",

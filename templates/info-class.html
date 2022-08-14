@@ -17,66 +17,26 @@
         }
     </style>
     <div>
-        <h2>Report card</h2>
+        <h2>Time table of revision class</h2>
         <div>
-            <h4>
-                TERM 1
-            </h4>
-
             <table>
                 <tr>
                     <th>Subject</th>
-                    <th>Asm.</th>
-                    <th>Mid.</th>
-                    <th>Fin.</th>
-                    <th>Avg.</th>
+                    <th>Teacher</th>
+                    <th>Day of week</th>
+                    <th>Time Start</th>
+                    <th>Time End</th>
                 </tr>
-                {% for item in term1 %}
+                {% for item in list_time_table_res %}
                     <tr>
-                        <td>{{ item.subject_name }}</td>
-                        <td>{{ item.ASSIGNMENT }}</td>
-                        <td>{{ item.MIDDLE }}</td>
-                        <td>{{ item.FINAL }}</td>
-                        <td>{{ item.AVG }}</td>
+                        <td>{{ item.name_subject }}</td>
+                        <td>{{ item.name_teacher }}</td>
+                        <td>{{ item.time_table.day_of_week }}</td>
+                        <td>{{ item.time_table.time_start }}</td>
+                        <td>{{ item.time_table.time_end }}</td>
                     </tr>
                 {% endfor %}
-
             </table>
-
-            <div style="display: flex;justify-content: space-between">
-                <span>GPA</span>
-                <span>{{ gpa1 }}</span>
-            </div>
         </div>
-        <div style="margin-top: 30px">
-            <h4>
-                TERM 2
-            </h4>
-
-            <table>
-                <tr>
-                    <th>Subject</th>
-                    <th>Asm.</th>
-                    <th>Mid.</th>
-                    <th>Fin.</th>
-                    <th>Avg.</th>
-                </tr>
-                {% for item in term2 %}
-                    <tr>
-                        <td>{{ item.subject_name }}</td>
-                        <td>{{ item.ASSIGNMENT }}</td>
-                        <td>{{ item.MIDDLE }}</td>
-                        <td>{{ item.FINAL }}</td>
-                        <td>{{ item.AVG }}</td>
-                    </tr>
-                {% endfor %}
-
-            </table>
-            <div style="display: flex;justify-content: space-between">
-                <span>GPA</span>
-                <span>{{ gpa2 }}</span>
-            </div>
-        </div>
-
     </div>
 {% endautoescape %}

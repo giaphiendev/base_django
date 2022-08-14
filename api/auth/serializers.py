@@ -86,6 +86,7 @@ class CustomizeTokenObtainPairPatchedSerializer(TokenObtainPairSerializer):
     def validate(self, request_data):
         user = UserHandler().get_user_by_password(request_data)
         refresh = self.get_token(user)
+
         data = {
             "user": GetAllFieldUserSerializer(user, many=False).data,
             "refresh": str(refresh),
@@ -93,6 +94,32 @@ class CustomizeTokenObtainPairPatchedSerializer(TokenObtainPairSerializer):
             "access": str(refresh.access_token),
             "access_token_expired": refresh.current_time + refresh.access_token.lifetime,
         }
+        role = user.role
+        if role == UserType.PARENT:
+            list_child = Student.objects.filter(
+                parent_id=user.id
+            ).select_related('user').select_related('my_class').values(
+                'id',
+                'user_id',
+                'user__last_name',
+                'user__first_name',
+                'user__email',
+                'user__date_of_birth',
+                'my_class__name',
+                'my_class__id',
+            )
+            res = []
+            for student in list_child:
+                res.append({
+                    'student_id': student.get('id'),
+                    'user_id': student.get('user_id'),
+                    'full_name': student.get('user__first_name') + " " + student.get('user__last_name'),
+                    'email': student.get('user__email'),
+                    'date_of_birth': student.get('user__date_of_birth'),
+                    'class_name': student.get('my_class__name'),
+                    'class_id': student.get('my_class__id'),
+                })
+            data['info_child'] = res
 
         return {
             "success": True,

@@ -1,10 +1,82 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% autoescape off %}
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
 
-</body>
-</html>
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
+    <div>
+        <h2>Report card - {{ full_name }}</h2>
+        <div>
+            <h4>
+                TERM 1
+            </h4>
+
+            <table>
+                <tr>
+                    <th>Subject</th>
+                    <th>Asm.</th>
+                    <th>Mid.</th>
+                    <th>Fin.</th>
+                    <th>Avg.</th>
+                </tr>
+                {% for item in term1 %}
+                    <tr>
+                        <td>{{ item.subject_name }}</td>
+                        <td>{{ item.ASSIGNMENT }}</td>
+                        <td>{{ item.MIDDLE }}</td>
+                        <td>{{ item.FINAL }}</td>
+                        <td>{{ item.AVG }}</td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+
+            <div style="display: flex;justify-content: space-between">
+                <span>GPA</span>
+                <span>{{ gpa1 }}</span>
+            </div>
+        </div>
+        <div style="margin-top: 30px">
+            <h4>
+                TERM 2
+            </h4>
+
+            <table>
+                <tr>
+                    <th>Subject</th>
+                    <th>Asm.</th>
+                    <th>Mid.</th>
+                    <th>Fin.</th>
+                    <th>Avg.</th>
+                </tr>
+                {% for item in term2 %}
+                    <tr>
+                        <td>{{ item.subject_name }}</td>
+                        <td>{{ item.ASSIGNMENT }}</td>
+                        <td>{{ item.MIDDLE }}</td>
+                        <td>{{ item.FINAL }}</td>
+                        <td>{{ item.AVG }}</td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+            <div style="display: flex;justify-content: space-between">
+                <span>GPA</span>
+                <span>{{ gpa2 }}</span>
+            </div>
+        </div>
+
+    </div>
+{% endautoescape %}
