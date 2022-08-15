@@ -58,13 +58,6 @@ def send_feedback_by_email(data):
         fail_silently=False,
     )
 
-    send_mail(
-        subject=data.get('title', "title"),
-        message=data.get('content', "content"),
-        from_email=settings.FROM_EMAIL,
-        recipient_list=[data.get('email')],
-        fail_silently=False,
-    )
     logger.info(f"Send feed successful!")
 
 

@@ -193,7 +193,7 @@ class CreateGradeView(APIView):
 
         data_push_notification = {
             "title": f"Teacher {request.user.first_name} {request.user.last_name}",
-            "message": f"Grade create for {student.user.first_name} {student.user.last_name} {grade.subject.name} term {grade.term} {grade.type_exam} | 2021 - 2022",
+            "message": f"Grade update for {student.user.first_name} {student.user.last_name} {grade.subject.name} term {grade.term} {grade.type_exam} | 2021 - 2022",
             "extra": {"created_at": datetime.datetime.now().date()},
             "user_id": [user_id, parent_id]
         }
