@@ -1,6 +1,6 @@
 # INSTALLATION
 
-* Copy `.env.example` to `.env` and edit it to your needs.
+* Copy `.env.example` to `.dkm` and edit it to your needs.
 * `$ cp .env.example .env`
 
 # WITHOUT DOCKER

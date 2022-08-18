@@ -21,15 +21,9 @@ services:
     networks:
       local:
     container_name: techwiz_mysql
-    restart: on-failure
-    environment:
-      - MYSQL_DATABASE=techwiz
-      - MYSQL_USER=admin
-      - MYSQL_PASSWORD=admin@123
-      - MYSQL_ROOT_USER=root
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_CONN_MAX_AGE=28800
-      - TZ=UTC
+    restart: always
+    env_file:
+      - ../.dkm
     volumes:
       - ./techwiz_1.sql:/techwiz_1.sql
     ports:
@@ -48,27 +42,13 @@ services:
       context: ../
     image: base_django_backend:latest
     restart: on-failure
-    environment:
-      - PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL:-http://127.0.0.1:8000}
-      # db
-      - DATABASE_USER=${DATABASE_USER:-admin}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-admin@123}
-      - DATABASE_NAME=${DATABASE_NAME:-techwiz}
-      - DATABASE_HOST=${DATABASE_HOST:-techwiz_mysql}
-      # email
-      - EMAIL_SMTP=${EMAIL_SMTP:-giaphiendev@gmail.com}
-      - EMAIL_SMTP_HOST=${EMAIL_SMTP_HOST:-smtp.gmail.com}
-      - EMAIL_SMTP_PORT=${EMAIL_SMTP_PORT:-587}
-      - EMAIL_SMTP_USER=${EMAIL_SMTP_USER:-giaphiendev@gmail.com}
-      - EMAIL_SMTP_PASSWORD=${EMAIL_SMTP_PASSWORD:-jklteovxvfwkkkpv}
-      - FROM_EMAIL=${FROM_EMAIL:-hienaloso98@gmail.com}
     ports:
       - "${HOST_PUBLISH_IP:-0.0.0.0}:${BACKEND_PORT:-8000}:8000"
-      - "5000:5000"
     volumes:
       - ../:/code
+      - ../../logs/base_django:/var/log/base_django/
     env_file:
-      - ../.env
+      - ../.dkm
     depends_on:
       - db
       - redis
@@ -80,9 +60,10 @@ services:
     image: base_django_backend:latest
     restart: on-failure
     env_file:
-      - ../.env
-    environment:
-      - DEBUG=False
+      - ../.dkm
+    volumes:
+      - ../:/code
+      - ../../logs/base_django:/var/log/base_django/
     build:
       dockerfile: ./docker/Dockerfile
       context: ../

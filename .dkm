@@ -1,0 +1,37 @@
+# environment for mysql (required)
+MYSQL_DATABASE=techwiz
+MYSQL_USER=admin
+MYSQL_PASSWORD=admin@123
+MYSQL_ROOT_USER=root
+MYSQL_ROOT_PASSWORD=root
+MYSQL_CONN_MAX_AGE=28800
+TZ=UTC
+
+
+SECRET_KEY=django-insecure-wl4%50m*9hxghq0ua45xh$+&ut0zalvdz6h$_$5m%s6k^xs6!c
+DEBUG=False
+
+# mysql connection on django app
+DATABASE_NAME=techwiz
+DATABASE_USER=admin
+DATABASE_PASSWORD=admin@123
+DATABASE_HOST=techwiz_mysql
+DATABASE_PORT=3306
+
+# send email configuration
+PUBLIC_BACKEND_URL=
+FROM_EMAIL=mail.no.reply8899@gmail
+EMAIL_SMTP=SMTP
+EMAIL_SMTP_HOST=smtp.gmail.com
+EMAIL_SMTP_PORT=587
+EMAIL_SMTP_USER=mail.no.reply8899@gmail.com
+EMAIL_SMTP_PASSWORD=iwclcsaxgsqdvndz
+
+# for redis connection
+REDIS_HOST=redis
+REDIS_PORT=6379
+REDIS_USER=
+REDIS_PASSWORD=
+REDIS_PROTOCOL=redis
+CELERY_BEAT_MAX_LOOP_INTERVAL=20
+CELERY_REDBEAT_LOCK_TIMEOUT=80

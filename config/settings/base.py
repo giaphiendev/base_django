@@ -12,10 +12,9 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import datetime
 from pathlib import Path
 import os
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 from urllib.parse import urljoin
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
@@ -26,15 +25,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY", "CHANGE_THIS_TO_SOMETHING_SECRET_IN_PRODUCTION")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", True)
+DEBUG = os.getenv("DEBUG", False)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
 # Application definition
 
 DJANGO_APPS = (
     "polymorphic",
-    'django.contrib.admin',
+    # 'django.contrib.admin',
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -51,13 +50,13 @@ THIRD_PARTY_APPS = (
     "djcelery_email",
     "django_celery_beat",
     "rest_framework_swagger",
-    "drf_yasg"
+    # "drf_yasg"
 )
 
 MY_CUSTOM_APPS = (
     "core",
     "api",
-    "ws",
+    # "ws",
     "custom_service",
 )
 
@@ -73,7 +72,7 @@ DJANGO_MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-CUSTOM_MIDDLEWARE = []  # ['utils.middlewares.QueryCountDebugMiddleware']
+CUSTOM_MIDDLEWARE = ['utils.middlewares.ShowIpAddressMiddleware']  # ['utils.middlewares.QueryCountDebugMiddleware']
 
 MIDDLEWARE = DJANGO_MIDDLEWARE + CUSTOM_MIDDLEWARE
 
@@ -231,10 +230,12 @@ REST_FRAMEWORK = {
 }
 
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_HEADERS = ["*"]
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = ['*']
 
 JWT_AUTH = {
     "JWT_EXPIRATION_DELTA": datetime.timedelta(days=30),
@@ -304,7 +305,7 @@ SPECTACULAR_SETTINGS = {
 # The storage must always overwrite existing files.
 DEFAULT_FILE_STORAGE = "core.storage.OverwriteFileSystemStorage"
 
-FROM_EMAIL = os.getenv("FROM_EMAIL", "hienaloso98@gmail.com")
+FROM_EMAIL = os.getenv("FROM_EMAIL", "")
 RESET_PASSWORD_TOKEN_MAX_AGE = 60 * 60 * 48  # 48 hours
 ROW_PAGE_SIZE_LIMIT = 200  # How many rows can be requested at once.
 TRASH_PAGE_SIZE_LIMIT = 200  # How many trash entries can be requested at once.
@@ -333,10 +334,10 @@ if os.getenv("EMAIL_SMTP", "SMTP"):
     # EMAIL_SMTP_USE_TLS for backwards compatibility after
     # fixing #448.
     EMAIL_USE_TLS = True
-    EMAIL_HOST = os.getenv("EMAIL_SMTP_HOST", "smtp.gmail.com")
-    EMAIL_PORT = os.getenv("EMAIL_SMTP_PORT", "587")
-    EMAIL_HOST_USER = os.getenv("EMAIL_SMTP_USER", 'giaphiendev@gmail.com')
-    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_SMTP_PASSWORD", "jklteovxvfwkkkpv")
+    EMAIL_HOST = os.getenv("EMAIL_SMTP_HOST", "")
+    EMAIL_PORT = os.getenv("EMAIL_SMTP_PORT", "")
+    EMAIL_HOST_USER = os.getenv("EMAIL_SMTP_USER", '')
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_SMTP_PASSWORD", "")
 
 else:
     CELERY_EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

@@ -37,7 +37,7 @@ djangorestframework-jwt==1.11.0
 djangorestframework-simplejwt==4.0.0
 drf-jwt==1.19.1
 drf-spectacular==0.21.1
-drf-yasg==1.21.3
+
 Eel==0.14.0
 future==0.18.2
 gevent==21.12.0
@@ -95,3 +95,4 @@ django_smtp_ssl
 django-mjml==0.11.0
 exponent_server_sdk==2.0.0
 rollbar==0.16.3
+pymysql>=0.10.1,<0.11.0

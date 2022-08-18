@@ -1,33 +1,70 @@
 from .base import *  # noqa: F403, F401
-import logging
+import errno
+
+LOG_DIR = "/var/log/base_django/"
+if not os.path.exists(os.path.dirname(LOG_DIR)):
+    try:
+        os.makedirs(os.path.dirname(LOG_DIR))
+    except OSError as exc:  # Guard against race condition
+        if exc.errno != errno.EEXIST:
+            raise
+
+ALLOWED_HOSTS = "*"
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "[%(levelname)s]\t%(asctime)s\t%(name)s\t%(module)s.%(funcName)s:%(lineno)s\t%(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S %z",
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+        'app': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': f'/var/log/base_django/app.log',
+            'formatter': 'verbose',
+        },
+        'info': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': f'/var/log/base_django/info.log',
+            'formatter': 'verbose',
+        },
+        'error': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': f'/var/log/base_django/error.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            "handlers": ["console", "app", "error"],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        "custom_logger": {
+            "level": "INFO",
+            "handlers": ["console", "app", "error", 'info'],
+            'propagate': True,
+        },
+    },
+    "root": {
+        "level": "INFO",
+        "handlers": ["console", "app", "error"],
+        'propagate': True,
+    },
+}
 
 try:
     from .local import *  # noqa: F403, F401
 except ImportError:
     pass
-
-DEBUG = True
-ALLOWED_HOSTS = "*"
-
-# logging query
-# LOGGING = {
-#     'version': 1,
-#     'filters': {
-#         'require_debug_true': {
-#             '()': 'django.utils.log.RequireDebugTrue',
-#         }
-#     },
-#     'handlers': {
-#         'console': {
-#             'level': 'DEBUG',
-#             'filters': ['require_debug_true'],
-#             'class': 'logging.StreamHandler',
-#         }
-#     },
-#     'loggers': {
-#         'django.db.backends': {
-#             'level': 'DEBUG',
-#             'handlers': ['console'],
-#         }
-#     }
-# }
