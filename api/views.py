@@ -45,7 +45,7 @@ class SendReportCardView(APIView):
             send_report_mark.delay(data)
 
         elif role == UserType.PARENT:
-            student_id = request.GET.get('student_id')
+            student_id = int(request.data.get("student_id"))
             user = Student.objects.filter(
                 id=student_id
             ).select_related('user').values('user__first_name', 'user__last_name')
@@ -53,7 +53,7 @@ class SendReportCardView(APIView):
                 "email": email,
                 "term1": GradeHandle().get_grade_family(student_id, 1),
                 "term2": GradeHandle().get_grade_family(student_id, 2),
-                "full_name": user.get('user__first_name') + " " + user.get('user__last_name'),
+                "full_name": user[0].get('user__first_name') + " " + user[0].get('user__last_name'),
             }
             send_report_mark.delay(data)
         return Response({"payload": None}, status=200)
