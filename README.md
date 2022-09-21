@@ -1,14 +1,14 @@
 # INSTALLATION
 
-* Copy `.env.example` to `.dkm` and edit it to your needs.
-* `$ cp .env.example .env`
+* Create folder `.envs` contain 3 files `.env.django_app` - `.env.mysql` - `.env.node_app`
 
 # WITHOUT DOCKER
 
 # WITH DOCKER
 
 * `$ docker-compose up -d --build`
-* Open browser and go to `localhost:8000/api/doc/` to see swagger
+* Open browser and go to `localhost:8000/api/doc/` to see swagger (django app)
+* Open browser and go to `localhost:5005` to check app (node app)
 
 ## Migrate for the first time
 
@@ -23,7 +23,6 @@
 * `$ exit`
 * `$ mysql -u root -p techwiz < ./data_sample/data.sql`
 * Type `root` press enter to go ahead!
-
 
 
 
