@@ -1,0 +1,91 @@
+version: '3'
+
+networks:
+  project_sem4_network:
+    driver: bridge
+
+services:
+  project_sem4_node:
+    build:
+      context: ./node-app/
+      dockerfile: ./Dockerfile
+    container_name: project_sem4_node
+    image: project_sem4_node_img:latest
+    networks:
+      - project_sem4_network
+    # restart: always
+    depends_on:
+      - project_sem4_mysql
+    volumes:
+      - ./node-app:/server-node
+      - /server-node/node_modules
+    command: bash -c "yarn dev"
+    ports:
+      - "${CHAT_APP_PORT:-5005}:${CHAT_APP_PORT:-5005}"
+    env_file:
+      - ./.envs/.env.mysql
+      - ./.envs/.env.node_app
+
+  project_sem4_mysql:
+    image: mysql:5.7
+    networks:
+      - project_sem4_network
+    container_name: project_sem4_mysql
+    restart: always
+    volumes:
+      - ./backup_data/:/var/lib/mysql
+      - ./techwiz_1.sql:/data_sample/data.sql
+    env_file:
+      - ./.envs/.env.mysql
+    ports:
+      - "${MYSQL_EXPORT_PORT:-3307}:${MYSQL_PORT:-3306}"
+
+  redis:
+    image: redis:6.0
+    ports:
+      - "6379:6379"
+    networks:
+      project_sem4_network:
+
+  project_sem4_django:
+    build:
+      dockerfile: ./docker/Dockerfile
+      context: ./django_app/
+    container_name: project_sem4_django
+    image: project_sem4_django_img:latest
+    # restart: always
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./django_app:/code-django
+#      - ../../logs/base_django:/var/log/base_django/
+    env_file:
+      - ./.envs/.env.mysql
+      - ./.envs/.env.django_app
+    depends_on:
+      - project_sem4_mysql
+      - redis
+    networks:
+      project_sem4_network:
+    command: sh -c "python manage.py runserver 0.0.0.0:8000"
+
+  project_sem4_django_celery:
+    build:
+      dockerfile: ./docker/Dockerfile
+      context: ./django_app/
+    container_name: project_sem4_django_celery
+    image: project_sem4_django_img:latest
+    # restart: always
+    env_file:
+      - ./.envs/.env.mysql
+      - ./.envs/.env.django_app
+    volumes:
+      - ./django_app:/code
+#      - ../../logs/base_django:/var/log/base_django/
+    command: celery -A config worker -E -l INFO -Q celery
+    depends_on:
+      - project_sem4_mysql
+      - redis
+      - project_sem4_django
+    networks:
+      project_sem4_network:

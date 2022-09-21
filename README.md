@@ -7,12 +7,26 @@
 
 # WITH DOCKER
 
-* `$ docker-compose -f docker/docker-compose.yml up -d --build`
+* `$ docker-compose up -d --build`
 * Open browser and go to `localhost:8000/api/doc/` to see swagger
 
 ## Migrate for the first time
 
-* `docker-compose -f docker/docker-compose.yml exec backend python manage.py migrate`
+* `docker-compose exec project_sem4_django python manage.py migrate`
+
+## Import data.sql by hand (if run command above: dont run this)
+* `$ docker exec -it project_sem4_mysql bash`
+* `$ mysql -u root -p`
+* Type `root` press enter to go ahead!
+
+* `$ create databases techwiz;`
+* `$ exit`
+* `$ mysql -u root -p techwiz < ./data_sample/data.sql`
+* Type `root` press enter to go ahead!
+
+
+
+
 
 ### Get container's log
 
@@ -20,7 +34,7 @@
 
 ### Seed data (Role)
 
-* `$ docker-compose -f docker/docker-compose.yml exec backend python manage.py loaddata seed/0001_Role.json`
+* `$ docker-compose exec project_sem4_django python manage.py loaddata seed/0001_Role.json`
 
 ## Process signup and login
 
@@ -38,3 +52,5 @@
 
 - `giaphiendev`
 - `h***0388******`
+
+### To push noti - follow [this tutorial](https://docs.expo.dev/push-notifications/sending-notifications/)

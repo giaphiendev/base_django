@@ -1,0 +1,84 @@
+version: "3"
+
+services:
+  #  db:
+  #    # Please ensure the postgres-client's major version in the backend image is kept in
+  #    # sync with this major version so pg_dump remains compatible.
+  #    image: postgres:11.3
+  #    environment:
+  #      - POSTGRES_USER=${DATABASE_USER:-base_django}
+  #      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-wl4%50md}
+  #      - POSTGRES_DB=${DATABASE_NAME:-base_django}
+  #    networks:
+  #      local:
+  #    ports:
+  #      - ${DATABASE_PORT:-5432}:5432
+  #    volumes:
+  #      - pgdata:/var/lib/postgresql/data
+
+  db:
+    image: mysql:5.7
+    networks:
+      local:
+    container_name: techwiz_mysql
+    restart: always
+    env_file:
+      - ../.dkm
+    volumes:
+      - ./techwiz_1.sql:/techwiz_1.sql
+    ports:
+      - "3306:3306"
+
+  redis:
+    image: redis:6.0
+    ports:
+      - "6379:6379"
+    networks:
+      local:
+
+  backend:
+    build:
+      dockerfile: ./docker/Dockerfile
+      context: ../
+    image: base_django_backend:latest
+    restart: on-failure
+    ports:
+      - "${HOST_PUBLISH_IP:-0.0.0.0}:${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ../:/code
+      - ../../logs/base_django:/var/log/base_django/
+    env_file:
+      - ../.dkm
+    depends_on:
+      - db
+      - redis
+    networks:
+      local:
+    command: sh -c "python manage.py runserver 0.0.0.0:8000"
+
+  celery:
+    image: base_django_backend:latest
+    restart: on-failure
+    env_file:
+      - ../.dkm
+    volumes:
+      - ../:/code
+      - ../../logs/base_django:/var/log/base_django/
+    build:
+      dockerfile: ./docker/Dockerfile
+      context: ../
+    command: celery -A config worker -E -l INFO -Q celery
+    depends_on:
+      - backend
+      - redis
+      - db
+    networks:
+      local:
+
+
+#volumes:
+#  pgdata:
+
+networks:
+  local:
+    driver: bridge
