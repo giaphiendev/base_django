@@ -11,6 +11,7 @@ from core.decorators import map_exceptions
 from core.exceptions import RoleNotFound, PinNotExists, PinExpired
 from core.models import UserPin
 from core.users.handler import UserHandler
+from custom_service.models.ModelTechwiz import DeviceTokenPushNotification
 from custom_service.task import send_email_from_celery
 
 from django.conf import settings
@@ -25,8 +26,14 @@ class LogoutView(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request):
+        device_token = request.data.get("device_token", '')
         token = request.data.get("refresh_token")
         UserHandler().logout_customer(token)
+        # make device token of user is inactive
+        DeviceTokenPushNotification.objects.filter(
+            user_id=request.user.id,
+            token=device_token
+        ).update(active=False)
         return Response({"revoked": request.data.get("refresh_token")}, status=200)
 
 

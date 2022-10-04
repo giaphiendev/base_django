@@ -1,28 +1,22 @@
-const express = require('express');
-const mysql = require('mysql');
+const app = require('express')();
+const http = require('http').createServer(app);
 
-const app = express();
-const PORT_SERVER = process.env.CHAT_APP_PORT || 5005;
+// import in routes
+const routers = require('./routes/health');
 
-// Create connection
-const db = mysql.createConnection({
-  host: process.env.MYSQL_HOST,
-  port: process.env.MYSQL_PORT,
-  user: process.env.MYSQL_USER,
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.MYSQL_DATABASE,
-  dialect: 'mysql',
-  pool: {
-    max: 5,
-    min: 0,
-    acquire: 30000,
-    idle: 10000,
-  },
+// import in routes
+const { DATABASE } = require('./utils/mysqlConnect');
+const {
+  CHANNEL_CHAT_REDIS,
+  REDISIO,
+  handleOnMessageRedis,
+} = require('./utils/chatSocket');
+const SOCKETIO = require('socket.io')(http, {
+  cors: { credentials: true },
 });
 
 // Connect to MySQL
-
-db.connect((err) => {
+DATABASE.connect((err) => {
   if (err) {
     throw err;
   }
@@ -30,30 +24,74 @@ db.connect((err) => {
 });
 
 // start define route
-app.get('/', function (req, res) {
-  res.send('Hello World!');
+app.use('/', routers);
+
+// server listen on port
+const PORT_SERVER = process.env.CHAT_APP_PORT || 5005;
+
+http.listen(PORT_SERVER, function () {
+  console.log(`Node app listening on port ${PORT_SERVER}!`);
 });
 
-app.get('/get', function (req, res) {
+// start chat app
+var users = [];
 
-    let sql = `SELECT *  FROM user;`;
-
-    db.query(sql, (err, result, fields) => {
-      if (err) {
-        throw err;
-      }
-      console.log('result: ', result[0]['email']);
-      console.log('================================================');
-
-      // console.log('fields: ', fields);
-
-      res.send('Getting record!');
-    });
-
-
+// redisio subcribe channel in redis server
+REDISIO.subscribe(CHANNEL_CHAT_REDIS, () => {
+  console.log(`channel has been subscribe: ${CHANNEL_CHAT_REDIS}`);
+});
+REDISIO.on('message', (channel, data) => {
+  var text = handleOnMessageRedis(channel, data);
+  console.log('run throught redisio on message');
+  SOCKETIO.emit('typing', text);
 });
 
-app.listen(PORT_SERVER, function () {
-  console.log(`Example app listening on port ${PORT_SERVER}!`);
-  console.log('process.env.CHAT_APP_PORT: ', process.env.CHAT_APP_PORT);
+// socket.io
+SOCKETIO.on('connection', (socket) => {
+  console.log('on.connection socket.id: ', socket.id);
+  socket.on('user_connected', (user_name) => {
+    console.log('user_connected ', user_name);
+    SOCKETIO.emit('typing', socket.id + ' hien');
+
+    // let tuple = {
+    //   user_name: user_name,
+    //   socket_id: socket.id,
+    // };
+    // // get unique element
+    // if (users.length > 0) {
+    //   users.forEach((element) => {
+    //     if (element['user_name'] == tuple['user_name']) {
+    //       let id = users.indexOf(element);
+    //       // xoa user_name da co trong users
+    //       users.splice(id, 1);
+    //     }
+    //   });
+    // }
+
+    // users.push(tuple);
+
+    // emit array of user with status active
+    // lay socket id of receiver
+    // let socketID = '';
+    // users.forEach((element) => {
+    //   if (element['user_name'] == '_1admin1') {
+    //     socketID = element['socket_id'];
+    //   }
+    // });
+    // SOCKETIO.to(socketID).emit('updateUsers', users);
+  });
+
+  // disconnect
+  socket.on('disconnect', function () {
+    console.log('on.disconnect socket.id: ', socket.id);
+    // remove element
+    // users.forEach((element) => {
+    //   if (element['socket_id'] == socket.id) {
+    //     let id = users.indexOf(element);
+    //     users.splice(id, 1);
+    //   }
+    // });
+    // update users
+    // SOCKETIO.emit('updateUsers', users);
+  });
 });

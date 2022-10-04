@@ -376,3 +376,5 @@ PIN_EXPIRATION_DELTA = datetime.timedelta(minutes=5)
 
 MAX_FIELD_LIMIT = 1500
 DEFAULT_PAGINATION_PAGE_SIZE = 100
+
+CHANNEL_CHAT_REDIS = os.getenv("CHANNEL_CHAT_REDIS", "private-chat-app")

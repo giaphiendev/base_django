@@ -159,3 +159,18 @@ def send_notification_to_device_celery(data):
                     PushNotificationHandle().send_push_message(token, title, message, extra=extra)
                     logger.info(f"pushed to token: {token}")
             logger.info(f"end push notification")
+
+
+"""
+@app.task()
+def test_send_message_chat(context):
+    from channels.layers import get_channel_layer
+    from django.conf import settings
+
+    channel_layer = get_channel_layer()
+    from asgiref.sync import async_to_sync
+
+    logger.info(f"start async_to_sync")
+    async_to_sync(channel_layer.group_send)(settings.CHANNEL_CHAT_REDIS, context)
+    logger.info(f"end async_to_sync")
+"""

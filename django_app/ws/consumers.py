@@ -1,7 +1,37 @@
 from channels.db import database_sync_to_async
-from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from channels.generic.websocket import AsyncJsonWebsocketConsumer, JsonWebsocketConsumer
 
 from ws.registries import page_registry
+from django.conf import settings
+from asgiref.sync import async_to_sync
+
+
+class ChatConsumer(JsonWebsocketConsumer):
+    def connect(self):
+        async_to_sync(self.channel_layer.group_add)(settings.CHANNEL_CHAT_REDIS, self.channel_name)
+        self.accept()
+
+    def disconnect(self, message):
+        async_to_sync(self.channel_layer.group_discard)(settings.CHANNEL_CHAT_REDIS, self.channel_name)
+
+    def receive_json(self, content, **kwargs):
+        print("Received event: {}".format(content))
+        self.send_json(content)
+
+    def send_message(self, content):
+        '''
+        @param content: {receiver_id: 'abc', message: 'string', event: 'string'}
+        @return:
+        '''
+        receiver_id = content['receiver_id']
+        message = content['message']
+        event = content['event']
+
+        print(f"receiver_id: {receiver_id}")
+        print(f"message: {message}")
+        print(f"event: {event}")
+
+        self.send_json(content)
 
 
 class CoreConsumer(AsyncJsonWebsocketConsumer):
@@ -120,7 +150,7 @@ class CoreConsumer(AsyncJsonWebsocketConsumer):
         ignore_web_socket_id = event["ignore_web_socket_id"]
 
         if (
-            not ignore_web_socket_id or ignore_web_socket_id != web_socket_id
+                not ignore_web_socket_id or ignore_web_socket_id != web_socket_id
         ) and self.scope["user"].id in user_ids:
             await self.send_json(payload)
 

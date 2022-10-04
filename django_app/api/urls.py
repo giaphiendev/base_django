@@ -15,7 +15,12 @@ from .studyResource import urls as resource_urls
 from .revisionClass import urls as revision_urls
 from .student import urls as student_urls
 from .notification import urls as notification_urls
-from .views import FeedBackView, SendReportCardView, SendInfoRevisionClassView
+from .views import (
+    FeedBackView,
+    SendReportCardView,
+    SendInfoRevisionClassView,
+    SubmitChatView,
+)
 
 app_name = "api"
 
@@ -65,5 +70,7 @@ urlpatterns = (
         # send email report card
         re_path(r"^send-report-card$", SendReportCardView.as_view(), name="send_report_card"),
         re_path(r"^send-info-revision$", SendInfoRevisionClassView.as_view(), name="send_info_revision_class"),
+        # api for submit chat
+        re_path(r"^submit-chat$", SubmitChatView.as_view(), name="submit_chat"),
     ]
 )

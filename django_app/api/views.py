@@ -1,14 +1,19 @@
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.revisionClass.crud import RevisionHandler
-from api.serializers import FeedBackSerializer
+from api.serializers import FeedBackSerializer, ChatSerializer
 from core.decorators import validate_body
 from core.models import UserType
 from custom_service.handlers.grade import GradeHandle
 from custom_service.models.ModelTechwiz import Student
-from custom_service.task import send_feedback_by_email, send_report_mark, send_info_revision_class
+from custom_service.redis_pub_sub import publish_data_on_redis
+from custom_service.task import (
+    send_feedback_by_email,
+    send_report_mark,
+    send_info_revision_class,
+)
 
 
 class FeedBackView(APIView):
@@ -74,4 +79,19 @@ class SendInfoRevisionClassView(APIView):
             'list_time_table_res': list_time_table_res
         }
         send_info_revision_class.delay(data)
+        return Response({"payload": None}, status=200)
+
+
+class SubmitChatView(APIView):
+    permission_classes = (AllowAny,)
+
+    @validate_body(ChatSerializer)
+    def post(self, request, data):
+        # type is function's name in chat_consumer
+        context = {
+            "message": data.get('message'),
+            "receiver_id": data.get('receiver_id'),
+        }
+        publish_data_on_redis(context)
+
         return Response({"payload": None}, status=200)
