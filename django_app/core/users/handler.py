@@ -19,6 +19,7 @@ from rest_framework_simplejwt.tokens import (
     TokenError,
 )
 
+from custom_service.models.ModelTechwiz import Student
 from .errors import ERROR_INVALID_TOKEN
 from core.utils import encode_base_64
 from core.constants import RoleName
@@ -52,6 +53,90 @@ jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
 
+
+class OptimizeUserHandler:
+    def get_list_user(self, data_filter_name=None):
+        """
+        @param data_filter_name: str
+        @return: list_user: User
+        """
+        list_user = User.objects.all()
+        if data_filter_name:
+            return list_user.filter(
+                Q(first_name__istartswith=data_filter_name) |
+                Q(last_name__istartswith=data_filter_name)
+            ).union(
+                list_user.filter(
+                    Q(first_name__icontains=data_filter_name) |
+                    Q(last_name__icontains=data_filter_name)
+                )
+            )
+        else:
+            list_user = User.objects.all()
+        return list_user
+
+    def get_detail_user(self, user_id):
+        return User.objects.get(pk=user_id)
+
+    def create_new_user(self, data, data_student=None, create_student=False):
+        """
+        @param
+        data: {
+            first_name: ''
+            last_name: ''
+            email: 'abc@yopmail.com'
+            phone: 0987632333
+            role: UserType
+            address: ''
+            date_of_birth: ''
+        }
+        data_student: {
+            parent: User,
+            my_class: MyClass
+        }
+        @return: new_user: User
+        """
+        email = normalize_email_address(data.get('email'))
+        data['email'] = email
+        data['username'] = email.split('@')[0]
+
+        if User.objects.filter(Q(email=email) | Q(username=email)).exists():
+            raise UserAlreadyExist(f"A user with username {email} already exists.")
+        new_user = User.objects.create(**data)
+
+        if create_student and data_student:
+            Student.objects.create(user=new_user, **data_student)
+        return new_user
+
+    def update_user(self, user_id, data):
+        """
+        @param
+        user_id: int
+        data: {
+            first_name: ''
+            last_name: ''
+            email: 'abc@yopmail.com'
+            phone: 0987632333
+            role: UserType
+            address: ''
+            date_of_birth: ''
+        }
+        """
+        User.objects.filter(pk=user_id).update(**data)
+
+    def update_student(self, student_id, data_student):
+        """
+        @param student_id: int
+        @param data_student: {
+            parent: User,
+            my_class: MyClass
+        }
+        """
+        Student.objects.filter(pk=student_id).update(**data_student)
+
+    def delete_user(self, user_id):
+        user = User.objects.filter(pk=user_id).first()
+        user.delete()
 
 class UserHandler:
     def get_user(self, user_id=None, email=None):

@@ -1,16 +1,16 @@
 from django.conf import settings
 from django.db import transaction
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from drf_spectacular.utils import extend_schema
 from itsdangerous.exc import BadSignature, BadTimeSignature, SignatureExpired
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_jwt.settings import api_settings
 from rest_framework_jwt.views import (
     ObtainJSONWebTokenView as RegularObtainJSONWebToken,
     RefreshJSONWebTokenView as RegularRefreshJSONWebToken,
     VerifyJSONWebTokenView as RegularVerifyJSONWebToken,
 )
-from drf_spectacular.utils import extend_schema
 
 from api.errors import (
     ERROR_ALREADY_EXISTS,
@@ -28,7 +28,7 @@ from api.user.serializers import (
     ChangePasswordBodyValidationSerializer,
     ResetPasswordBodyValidationSerializer,
     SendResetPasswordEmailBodyValidationSerializer,
-    NormalizedEmailWebTokenSerializer, GetUserSerializer, UpdateUserSerializer, ForgotPasswordBodyValidationSerializer
+    NormalizedEmailWebTokenSerializer, GetUserSerializer, ForgotPasswordBodyValidationSerializer
 )
 from core.decorators import map_exceptions, validate_body
 from core.exceptions import (
@@ -40,10 +40,87 @@ from core.exceptions import (
 )
 from core.jwt import user_data_registry
 from core.models import UserPin
-from core.users.handler import UserHandler
+from core.users.handler import UserHandler, OptimizeUserHandler
+from utils.base_views import PaginationApiView
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+
+
+class ListUserApiView(PaginationApiView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        data_param = request.GET
+        name_search_user = data_param.get('name')
+
+        list_user = OptimizeUserHandler().get_list_user(data_filter_name=name_search_user if name_search_user else '')
+        page_info, paginated_data = self.get_paginated(list_user)
+
+        serializer = GetUserSerializer(paginated_data, many=True)
+        response = {
+            'payload': serializer.data,
+            'page_info': page_info
+        }
+        return Response(response, status=200)
+
+    def post(self, request):
+        data = request.data
+        new_user = OptimizeUserHandler().create_new_user(data)
+        serializer = GetUserSerializer(new_user)
+        response = {
+            'payload': serializer.data
+        }
+        return Response(response, status=200)
+
+
+class DetailUserApiView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, user_id):
+        user = OptimizeUserHandler().get_detail_user(user_id)
+        serializer = GetUserSerializer(user)
+        response = {
+            "payload": serializer.data
+        }
+        return Response(response, status=200)
+
+    def put(self, request, user_id):
+        data = request.data
+        try:
+            OptimizeUserHandler().update_user(user_id=user_id, data=data)
+            return Response(
+                {
+                    'payload': None
+                },
+                status=200
+            )
+        except:
+            return Response(
+                {
+                    'payload': None,
+                    'error': 'Check data',
+                },
+                status=400
+            )
+
+    def delete(self, request, user_id):
+        try:
+            OptimizeUserHandler().delete_user(user_id)
+            return Response(
+                {
+                    'payload': None
+                },
+                status=204
+            )
+        except:
+            return Response(
+                {
+                    'payload': None,
+                    'error': 'Something went wrong!',
+                },
+                status=400
+            )
 
 
 class UserView(APIView):
