@@ -1,15 +1,19 @@
 from datetime import datetime
 
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core.decorators import validate_body
+from core.decorators import validate_body, map_exceptions
 from core.models import UserType
-from custom_service.models.ModelTechwiz import Student, RevisionClass, ClassTeacherSubject, Subject
+from custom_service.errors import ERROR_POST_NOT_FOUND
+from custom_service.exceptions import PostNotFound
+from custom_service.models.ModelTechwiz import Student, RevisionClass, ClassTeacherSubject, Subject, User
+from utils.base_views import PaginationApiView
 from .crud import RevisionHandler
-from .serializers import PutTimeTableSerializer
+from .serializers import RevisionClassSerializer, PutTimeTableSerializer
 from custom_service.task import send_notification_to_device_celery
+
 
 
 class GetRevision(APIView):
@@ -69,3 +73,69 @@ class UpdateTimeTableView(APIView):
         send_notification_to_device_celery.delay(data_push_notification)
 
         return Response({'payload': None}, status=200)
+
+class GetListRevisonView(PaginationApiView):
+    permission_classes = (AllowAny,)  # IsAuthenticated
+
+    def get(self, request):
+        all_revision = RevisionClass.objects.all()
+        page_info, paginated_data = self.get_paginated(all_revision)
+        serializer = RevisionClassSerializer(paginated_data, many=True).data
+        data = {
+            'data': serializer,
+            'page_info': page_info
+        }
+        return Response(data, status=200)
+
+    def post(self, request, data):
+        data = request.data
+        data["subject"] = Subject.objects.filter(id=data.get('subject')).first()
+        data["teacher"] = User.objects.filter(id=data.get('teacher')).first()
+        revision = RevisionHandler().create_revision(data)
+        serializer = RevisionClassSerializer(revision).data
+        data = {
+            'payload': serializer
+        }
+        return Response(data, status=200)
+
+class DetailView(APIView):
+    permission_classes = (AllowAny,)
+    serializer_class = RevisionClassSerializer
+    handler_class = RevisionHandler
+    @map_exceptions(
+        {
+            PostNotFound: ERROR_POST_NOT_FOUND,
+        }
+    )
+    def get(self, request, revision_id):
+        revision = self.handler_class().get_revision(revision_id)
+        serializer = self.serializer_class(revision).data
+        data = {
+            'data': serializer
+        }
+        return Response(data, status=200)
+
+    @map_exceptions(
+        {
+            PostNotFound: ERROR_POST_NOT_FOUND,
+        }
+    )
+    def delete(self, request, **kwargs):
+        revision_id = kwargs.get("revision_id")
+        self.handler_class().delete_revision(revision_id)
+        return Response(
+                {
+                    'payload': None
+                },
+                status=204
+            )
+    def put(self, request, revision_id):
+        data = request.data
+        data["subject"] = Subject.objects.filter(id=data.get('subject')).first()
+        data["teacher"] = User.objects.filter(id=data.get('teacher')).first()
+        revision = RevisionHandler().update_revision_by_admin(revision_id, data)
+        serializer = RevisionClassSerializer(revision).data
+        data = {
+            'payload': serializer
+        }
+        return Response(data, status=200)

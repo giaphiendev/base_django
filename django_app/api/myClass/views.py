@@ -35,7 +35,7 @@ class GetListMyClassView(PaginationApiView):
 
 
 class DetailMyClassView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
     serializer_class = MyClassSerializer
     handler_class = MyClassHandler
 
@@ -44,11 +44,12 @@ class DetailMyClassView(APIView):
             PostNotFound: ERROR_POST_NOT_FOUND,
         }
     )
-    def get(self, request, class_id):
-        myClass = self.handler_class().get_myClass(class_id)
-        myClass_serializer = self.serializer_class(myClass).data
+
+    def get(self, request, myClass_id):
+        myclass = self.handler_class().get_myClass(myClass_id)
+        serializer = self.serializer_class(myclass).data
         data = {
-            'data': myClass_serializer
+            'data': serializer
         }
         return Response(data, status=200)
 
@@ -57,25 +58,20 @@ class DetailMyClassView(APIView):
             PostNotFound: ERROR_POST_NOT_FOUND,
         }
     )
-    @validate_body(PutMyClassSerializer)
-    def put(self, request, class_id, data):
-        myClass = self.handler_class().update_myClass(class_id, data)
-        myClass_serializer = self.serializer_class(myClass).data
-        data_res = {
-            'data': myClass_serializer
-        }
-        return Response(data_res, status=200)
-
-    @map_exceptions(
-        {
-            PostNotFound: ERROR_POST_NOT_FOUND,
-        }
-    )
     def delete(self, request, **kwargs):
-        class_id = kwargs.get("class_id")
-        self.handler_class().delete_myClass(class_id)
+        myClass_id = kwargs.get("myClass_id")
+        self.handler_class().delete_myClass(myClass_id)
+        return Response(
+                {
+                    'payload': None
+                },
+                status=204
+            )
+    def put(self, request, myClass_id):
+        data = request.data
+        myclass = MyClassHandler().update_myClass(myClass_id, data)
+        serializer = MyClassSerializer(myclass).data
         data = {
-            'payload': None,
-            'error': None
+            'payload': serializer
         }
-        return Response(data, status=204)
+        return Response(data, status=200)

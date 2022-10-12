@@ -2,7 +2,7 @@ from django.urls import re_path
 
 from api.myClass.views import (
     GetListMyClassView,
-    DetailMyClassView
+    DetailMyClassView,
 )
 
 app_name = "api.myClass"

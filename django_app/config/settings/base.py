@@ -50,7 +50,7 @@ THIRD_PARTY_APPS = (
     "djcelery_email",
     "django_celery_beat",
     "rest_framework_swagger",
-    # "drf_yasg"
+    "drf_yasg"
 )
 
 MY_CUSTOM_APPS = (

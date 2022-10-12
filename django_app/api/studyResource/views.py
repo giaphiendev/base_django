@@ -68,7 +68,7 @@ class GetResource(PaginationApiView):
 
 
 class DetailResourceView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
     serializer_class = ResourceSerializer
     handler_class = StudyResourceHandler
 
@@ -112,3 +112,27 @@ class DetailResourceView(APIView):
             'error': None
         }
         return Response(data, status=204)
+
+class CreateView(PaginationApiView):
+    permission_classes = (AllowAny,)  # IsAuthenticated
+
+    # def get(self, request):
+    #     all_helplines = HelpLine.objects.all()
+    #     page_info, paginated_data = self.get_paginated(all_helplines)
+    #     helplines_serializer = HelpLineSerializer(paginated_data, many=True).data
+    #     data = {
+    #         'data': helplines_serializer,
+    #         'page_info': page_info
+    #     }
+    #     return Response(data, status=200)
+
+    @validate_body(PutResourceSerializer)
+    def post(self, request, data):
+        # data = request.data
+        data["subject"] = Subject.objects.filter(id=data.get('subject')).first()
+        resource = StudyResourceHandler().create_resource(data)
+        serializer = ResourceSerializer(resource).data
+        data = {
+            'data': serializer
+        }
+        return Response(data, status=200)
