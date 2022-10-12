@@ -1,6 +1,6 @@
 from custom_service.models.ModelTechwiz import Subject, User, RevisionClass, ClassTeacherSubject, TimeTable, Student
-
-
+from custom_service.exceptions import PostNotFound
+from django.db import transaction
 class RevisionHandler:
     def get_revision_by_teacher(self, teacher_id):
         #  list_revision
@@ -81,3 +81,39 @@ class RevisionHandler:
             data: {time_table_id: 1, day_of_week: 'monday', end_time: '', start_time: ''}
         """
         TimeTable.objects.filter(id=time_table_id).update(**data)
+
+    def get_revision(self, pk):
+        """
+        Get revision by id
+        """
+        try:
+            return RevisionClass.objects.get(
+                pk=pk,
+            )
+        except RevisionClass.DoesNotExist:
+            raise PostNotFound(f"The Class not found")
+
+    def create_revision(self, data):
+        """
+        Create revision
+        """
+        with transaction.atomic():
+            revision = RevisionClass.objects.create(**data)
+
+        return revision
+
+    def update_revision_by_admin(self, pk, data):
+        """
+        Update revision by admin
+        """
+        with transaction.atomic():
+            RevisionClass.objects.filter(pk=pk).update(**data)
+            # Update cart
+            return self.get_revision(pk)
+
+    def delete_revision(self, pk):
+        """
+        Delete a revision
+        """
+        post = self.get_revision(pk)
+        post.delete()
