@@ -76,7 +76,7 @@ class GradeHandle:
         date_start_year = datetime(datetime.now().year, 9, 1).date()
         # get list subject
         if datetime.now().date() > date_start_year:
-            all_grade = Grade.objects.filter(student_id=student_id, start_year=datetime.now().year).select_related(
+            all_grade = Grade.objects.filter(student_id=student_id, start_year__gte=datetime.now().year).select_related(
                 'subject').all()
         else:
             all_grade = Grade.objects.filter(student_id=student_id, end_year=datetime.now().year).select_related(
