@@ -2,12 +2,65 @@ from django.contrib.auth.models import update_last_login
 from rest_framework import serializers
 from rest_framework_jwt.serializers import JSONWebTokenSerializer
 
-from core.models import User, UserPin
+from core.models import User, UserPin, UserType
 from core.users.handler import UserHandler
 from core.users.utils import normalize_email_address
+from custom_service.models.ModelTechwiz import Student, MyClass, ClassTeacherSubject
 from utils import error
 from utils.logger import logger_raise_warn_exception
 from utils.validators import password_validation, validate_phone_number
+
+
+class GetUserChatSerializer(serializers.Serializer):
+    """
+        nếu là student thì có thông tin lớp, với email + sđt
+        nếu là parent thì có thông tin con, lớp của con, với email & sđt
+        nếu là teacher thì có list các lớp đang dạy kèm môn, với email + sđt
+    """
+    info = serializers.SerializerMethodField()
+
+    def get_info(self, instance):
+        if instance.role == UserType.STUDENT or instance.role == UserType.PARENT:
+            if instance.role == UserType.STUDENT:
+                student = Student.objects.filter(user_id=instance.id).select_related('my_class').first()
+            else:
+                student = Student.objects.filter(parent_id=instance.id).select_related('my_class').first()
+            return {
+                "role": instance.role,
+                "email": instance.email,
+                "phone": instance.phone,
+                "first_name": instance.first_name,
+                "last_name": instance.last_name,
+                "user_id": instance.id,
+                "student_id": student.id,
+                "class_name": student.my_class.name,
+            }
+        elif instance.role == UserType.TEACHER:
+            list_class_teacher_sub = ClassTeacherSubject.objects.filter(
+                teacher_id=instance.id
+            ).select_related(
+                'my_class',
+                'subject'
+            ).all()
+            details = []
+            if len(list_class_teacher_sub):
+                for item in list_class_teacher_sub:
+                    details.append({
+                        'subject_id': item.subject.id,
+                        'subject_name': item.subject.name,
+                        'class_id': item.my_class.id,
+                        'class_name': item.my_class.name
+                    })
+            return {
+                "role": instance.role,
+                "email": instance.email,
+                "phone": instance.phone,
+                "first_name": instance.first_name,
+                "last_name": instance.last_name,
+                "user_id": instance.id,
+                "details": details
+            }
+        return None
 
 
 class GetUserSerializer(serializers.ModelSerializer):

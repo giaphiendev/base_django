@@ -28,7 +28,10 @@ from api.user.serializers import (
     ChangePasswordBodyValidationSerializer,
     ResetPasswordBodyValidationSerializer,
     SendResetPasswordEmailBodyValidationSerializer,
-    NormalizedEmailWebTokenSerializer, GetUserSerializer, ForgotPasswordBodyValidationSerializer
+    NormalizedEmailWebTokenSerializer,
+    GetUserSerializer,
+    ForgotPasswordBodyValidationSerializer,
+    GetUserChatSerializer
 )
 from core.decorators import map_exceptions, validate_body
 from core.exceptions import (
@@ -47,14 +50,42 @@ jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
 
+class SearchUserChatApiView(PaginationApiView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        data_param = request.GET
+        name_search_user = data_param.get('name', '')
+        role = request.user.role
+
+        list_user = OptimizeUserHandler().get_list_user(
+            data_filter_name=name_search_user,
+            ignore_role_admin=True
+        )
+        page_info, paginated_data = self.get_paginated(list_user)
+
+        serializer = GetUserChatSerializer(paginated_data, many=True)
+        payload = []
+        if len(serializer.data):
+            for item in serializer.data:
+                payload.append({
+                    **item['info']
+                })
+        response = {
+            'payload': payload,
+            'page_info': page_info
+        }
+        return Response(response, status=200)
+
+
 class ListUserApiView(PaginationApiView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
         data_param = request.GET
-        name_search_user = data_param.get('name')
+        name_search_user = data_param.get('name', '')
 
-        list_user = OptimizeUserHandler().get_list_user(data_filter_name=name_search_user if name_search_user else '')
+        list_user = OptimizeUserHandler().get_list_user(data_filter_name=name_search_user)
         page_info, paginated_data = self.get_paginated(list_user)
 
         serializer = GetUserSerializer(paginated_data, many=True)

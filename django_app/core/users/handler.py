@@ -28,7 +28,7 @@ from core.exceptions import (
     BaseURLHostnameNotAllowed,
 )
 from core.models import (
-    UserPin,
+    UserPin, UserType,
     # UserRole,
 )
 
@@ -55,24 +55,29 @@ jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
 
 
 class OptimizeUserHandler:
-    def get_list_user(self, data_filter_name=None):
+    def get_list_user(self, data_filter_name=None, ignore_role_admin=False):
         """
         @param data_filter_name: str
         @return: list_user: User
         """
-        list_user = User.objects.all()
+
+        if ignore_role_admin:
+            list_user = User.objects.filter(
+                Q(role__in=[UserType.STUDENT, UserType.PARENT, UserType.TEACHER])
+            )
+        else:
+            list_user = User.objects.all()
         if data_filter_name:
             return list_user.filter(
                 Q(first_name__istartswith=data_filter_name) |
-                Q(last_name__istartswith=data_filter_name)
+                Q(last_name__istartswith=data_filter_name) |
+                Q(email__icontains=data_filter_name)
             ).union(
                 list_user.filter(
                     Q(first_name__icontains=data_filter_name) |
                     Q(last_name__icontains=data_filter_name)
                 )
             )
-        else:
-            list_user = User.objects.all()
         return list_user
 
     def get_detail_user(self, user_id):
@@ -137,6 +142,7 @@ class OptimizeUserHandler:
     def delete_user(self, user_id):
         user = User.objects.filter(pk=user_id).first()
         user.delete()
+
 
 class UserHandler:
     def get_user(self, user_id=None, email=None):

@@ -5,26 +5,26 @@ networks:
     driver: bridge
 
 services:
-  project_sem4_node:
-    build:
-      context: ./node-app/
-      dockerfile: ./Dockerfile
-    container_name: project_sem4_node
-    image: project_sem4_node_img:latest
-    networks:
-      - project_sem4_network
-    # restart: always
-    depends_on:
-      - project_sem4_mysql
-    volumes:
-      - ./node-app:/server-node
-      - /server-node/node_modules
-    command: bash -c "yarn dev"
-    ports:
-      - "${CHAT_APP_PORT:-5005}:${CHAT_APP_PORT:-5005}"
-    env_file:
-      - ./.envs/.env.mysql
-      - ./.envs/.env.node_app
+  # project_sem4_node:
+  #   build:
+  #     context: ./node-app/
+  #     dockerfile: ./Dockerfile
+  #   container_name: project_sem4_node
+  #   image: project_sem4_node_img:latest
+  #   networks:
+  #     - project_sem4_network
+  #   # restart: always
+  #   depends_on:
+  #     - project_sem4_mysql
+  #   volumes:
+  #     - ./node-app:/server-node
+  #     - /server-node/node_modules
+  #   command: bash -c "yarn dev"
+  #   ports:
+  #     - "${CHAT_APP_PORT:-5005}:${CHAT_APP_PORT:-5005}"
+  #   env_file:
+  #     - ./.envs/.env.mysql
+  #     - ./.envs/.env.node_app
 
   project_sem4_mysql:
     image: mysql:5.7
@@ -53,7 +53,7 @@ services:
       context: ./django_app/
     container_name: project_sem4_django
     image: project_sem4_django_img:latest
-    # restart: always
+    restart: always
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:

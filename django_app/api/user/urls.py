@@ -6,6 +6,7 @@ from api.user.views import (
     ForgotPasswordView,
     ListUserApiView,
     DetailUserApiView,
+    SearchUserChatApiView
 )
 
 app_name = "api.user"
@@ -25,6 +26,7 @@ urlpatterns = [
     ),
     re_path(r"^$", UserView.as_view(), name="index"),
     # sample
+    re_path(r"^search-user-chat$", SearchUserChatApiView.as_view(), name="search_user_chat"),
     re_path(r"^list$", ListUserApiView.as_view(), name="index"),
     re_path(r"^detail/(?P<user_id>[0-9]+)$", DetailUserApiView.as_view(), name="index"),
 ]
