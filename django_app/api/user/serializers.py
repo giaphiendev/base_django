@@ -20,11 +20,8 @@ class GetUserChatSerializer(serializers.Serializer):
     info = serializers.SerializerMethodField()
 
     def get_info(self, instance):
-        if instance.role == UserType.STUDENT or instance.role == UserType.PARENT:
-            if instance.role == UserType.STUDENT:
-                student = Student.objects.filter(user_id=instance.id).select_related('my_class').first()
-            else:
-                student = Student.objects.filter(parent_id=instance.id).select_related('my_class').first()
+        if instance.role == UserType.STUDENT:
+            student = Student.objects.filter(user_id=instance.id).select_related('my_class').first()
             return {
                 "role": instance.role,
                 "email": instance.email,
@@ -34,6 +31,29 @@ class GetUserChatSerializer(serializers.Serializer):
                 "user_id": instance.id,
                 "student_id": student.id,
                 "class_name": student.my_class.name,
+            }
+        elif instance.role == UserType.PARENT:
+            students = Student.objects.filter(parent_id=instance.id).select_related('my_class', 'user').all()
+            details = []
+            if len(students):
+                for item in students:
+                    details.append({
+                        "student_id": item.user.id,
+                        "student_email": item.user.email,
+                        "student_phone": item.user.phone,
+                        "student_first_name": item.user.first_name,
+                        "student_last_name": item.user.last_name,
+                        "class_name": item.my_class.name,
+                        "class_id": item.my_class.id,
+                    })
+            return {
+                "role": instance.role,
+                "email": instance.email,
+                "phone": instance.phone,
+                "first_name": instance.first_name,
+                "last_name": instance.last_name,
+                "user_id": instance.id,
+                'details': details
             }
         elif instance.role == UserType.TEACHER:
             list_class_teacher_sub = ClassTeacherSubject.objects.filter(
