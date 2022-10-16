@@ -1,6 +1,19 @@
 from rest_framework import serializers
 
-from custom_service.models.ModelTechwiz import ClassTeacherSubject
+from api.myClass.serializers import MyClassSerializer
+from api.subject.serializers import SubjectSerializer
+from api.user.serializers import GetUserSerializer
+from core.models import User
+from custom_service.models.ModelTechwiz import ClassTeacherSubject, MyClass, Subject
+
+
+class ClassTeacherSubjectSerializer(serializers.Serializer):
+    info = serializers.SerializerMethodField()
+
+    def get_info(self, instance):
+        return {
+            **instance
+        }
 
 
 class Serializer(serializers.ModelSerializer):

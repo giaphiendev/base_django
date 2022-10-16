@@ -2,7 +2,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.class_teacher_subject.serializers import Serializer, PutSerializer
+from api.class_teacher_subject.serializers import Serializer, PutSerializer, ClassTeacherSubjectSerializer
 from core.decorators import map_exceptions, validate_body
 from custom_service.errors import ERROR_POST_NOT_FOUND
 from custom_service.exceptions import PostNotFound
@@ -15,11 +15,32 @@ class GetListView(PaginationApiView):
     permission_classes = (AllowAny,)  # IsAuthenticated
 
     def get(self, request):
-        all = ClassTeacherSubject.objects.all()
+        all = ClassTeacherSubject.objects.select_related(
+            'my_class',
+            'subject'
+        ).all().values(
+            'id',
+            'my_class_id',
+            'my_class__name',
+            'subject_id',
+            'subject__name',
+            'teacher_id',
+            'teacher__email',
+            'teacher__address',
+            'teacher__phone',
+            'teacher__first_name',
+            'teacher__last_name',
+        )
         page_info, paginated_data = self.get_paginated(all)
-        serializer = Serializer(paginated_data, many=True).data
+        serializer = ClassTeacherSubjectSerializer(paginated_data, many=True).data
+        payload = []
+        if len(serializer):
+            for item in serializer:
+                payload.append({
+                    **item['info']
+                })
         data = {
-            'data': serializer,
+            'data': payload,
             'page_info': page_info
         }
         return Response(data, status=200)
@@ -36,10 +57,12 @@ class GetListView(PaginationApiView):
         }
         return Response(data, status=200)
 
+
 class DetailView(APIView):
     permission_classes = (AllowAny,)
     serializer_class = Serializer
     handler_class = Handler
+
     @map_exceptions(
         {
             PostNotFound: ERROR_POST_NOT_FOUND,
@@ -62,11 +85,12 @@ class DetailView(APIView):
         id = kwargs.get("id")
         self.handler_class().delete(id)
         return Response(
-                {
-                    'payload': None
-                },
-                status=204
-            )
+            {
+                'payload': None
+            },
+            status=204
+        )
+
     def put(self, request, id):
         data = request.data
         data["my_class"] = MyClass.objects.filter(id=data.get('my_class')).first()
@@ -78,4 +102,3 @@ class DetailView(APIView):
             'payload': serializer
         }
         return Response(data, status=200)
-
