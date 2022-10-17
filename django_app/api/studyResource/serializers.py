@@ -13,6 +13,7 @@ class GetResourceSerializer(serializers.Serializer):
         subject_name = instance.subject.id
         subject_id = instance.subject.name
         return {
+            "id": instance.id,
             "name": name,
             "type": type,
             "link": link,
