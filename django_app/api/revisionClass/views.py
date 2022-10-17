@@ -11,7 +11,7 @@ from custom_service.exceptions import PostNotFound
 from custom_service.models.ModelTechwiz import Student, RevisionClass, ClassTeacherSubject, Subject, User
 from utils.base_views import PaginationApiView
 from .crud import RevisionHandler
-from .serializers import RevisionClassSerializer, PutTimeTableSerializer
+from .serializers import RevisionClassSerializer, PutTimeTableSerializer, GetRevisionClassSerializer
 from custom_service.task import send_notification_to_device_celery
 
 
@@ -80,9 +80,13 @@ class GetListRevisonView(PaginationApiView):
     def get(self, request):
         all_revision = RevisionClass.objects.all()
         page_info, paginated_data = self.get_paginated(all_revision)
-        serializer = RevisionClassSerializer(paginated_data, many=True).data
+        serializer = GetRevisionClassSerializer(paginated_data, many=True).data
+        payload = []
+        if len(serializer):
+            for item in serializer:
+                payload.append({**item.get('info')})
         data = {
-            'data': serializer,
+            'data': payload,
             'page_info': page_info
         }
         return Response(data, status=200)

@@ -3,8 +3,7 @@ from datetime import datetime
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from api.studyResource.serializers import ResourceSerializer, PutResourceSerializer
+from api.studyResource.serializers import ResourceSerializer, PutResourceSerializer, GetResourceSerializer
 from core.decorators import map_exceptions, validate_body
 from core.models import UserType
 from custom_service.errors import ERROR_POST_NOT_FOUND
@@ -23,11 +22,15 @@ class GetResource(PaginationApiView):
         if subject_id is None:
             all_resource = StudyResource.objects.all()
         else:
-            all_resource = StudyResource.objects.filter(subject_id=subject_id).all()
+            all_resource = StudyResource.objects.filter(subject_id=subject_id).select_related('subject').all()
         page_info, paginated_data = self.get_paginated(all_resource)
-        post_serializer = ResourceSerializer(paginated_data, many=True).data
+        post_serializer = GetResourceSerializer(paginated_data, many=True).data
+        payload = []
+        if len(post_serializer):
+            for item in post_serializer:
+                payload.append({**item.get('info')})
         data = {
-            'data': post_serializer,
+            'data': payload,
             'page_info': page_info
         }
         return Response(data, status=200)
@@ -112,6 +115,7 @@ class DetailResourceView(APIView):
             'error': None
         }
         return Response(data, status=204)
+
 
 class CreateView(PaginationApiView):
     permission_classes = (AllowAny,)  # IsAuthenticated
