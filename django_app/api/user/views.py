@@ -42,7 +42,7 @@ from core.exceptions import (
     BaseURLHostnameNotAllowed, PinExpired, PinNotExists
 )
 from core.jwt import user_data_registry
-from core.models import UserPin
+from core.models import UserPin, User, UserType
 from core.users.handler import UserHandler, OptimizeUserHandler
 from utils.base_views import PaginationApiView
 
@@ -84,9 +84,14 @@ class ListUserApiView(PaginationApiView):
         data_param = request.GET
         name_search_user = data_param.get('name', '')
 
-        list_user = OptimizeUserHandler().get_list_user(data_filter_name=name_search_user)
-        page_info, paginated_data = self.get_paginated(list_user)
+        filter_role = data_param.get('role', '')
 
+        list_user = OptimizeUserHandler().get_list_user(
+            data_filter_name=name_search_user,
+            filter_role=filter_role
+        )
+        # response
+        page_info, paginated_data = self.get_paginated(list_user)
         serializer = GetUserSerializer(paginated_data, many=True)
         response = {
             'payload': serializer.data,

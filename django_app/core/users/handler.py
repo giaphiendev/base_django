@@ -55,7 +55,7 @@ jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
 
 
 class OptimizeUserHandler:
-    def get_list_user(self, data_filter_name=None, ignore_role_admin=False):
+    def get_list_user(self, data_filter_name=None, ignore_role_admin=False, filter_role=None):
         """
         @param data_filter_name: str
         @return: list_user: User
@@ -66,7 +66,15 @@ class OptimizeUserHandler:
                 Q(role__in=[UserType.STUDENT, UserType.PARENT, UserType.TEACHER])
             )
         else:
-            list_user = User.objects.all()
+            if filter_role == 'parent':
+                list_user = User.objects.filter(role=UserType.PARENT)
+            elif filter_role == 'teacher':
+                list_user = User.objects.filter(role=UserType.TEACHER)
+            elif filter_role == 'student':
+                list_user = User.objects.filter(role=UserType.STUDENT)
+            else:
+                list_user = User.objects.all()
+
         if data_filter_name:
             return list_user.filter(
                 Q(first_name__istartswith=data_filter_name) |

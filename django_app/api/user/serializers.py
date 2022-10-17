@@ -86,7 +86,7 @@ class GetUserChatSerializer(serializers.Serializer):
 class GetUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("email", "phone", "first_name", "last_name", "date_of_birth", "address", "avatar_url", "id")
+        fields = ("role", "email", "phone", "first_name", "last_name", "date_of_birth", "address", "avatar_url", "id")
         extra_kwargs = {
             "id": {"read_only": True},
         }
