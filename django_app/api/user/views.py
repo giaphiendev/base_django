@@ -56,7 +56,6 @@ class SearchUserChatApiView(PaginationApiView):
     def get(self, request):
         data_param = request.GET
         name_search_user = data_param.get('name', '')
-        role = request.user.role
 
         list_user = OptimizeUserHandler().get_list_user(
             data_filter_name=name_search_user,
@@ -79,7 +78,7 @@ class SearchUserChatApiView(PaginationApiView):
 
 
 class ListUserApiView(PaginationApiView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
     def get(self, request):
         data_param = request.GET

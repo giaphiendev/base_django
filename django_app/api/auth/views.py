@@ -4,7 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 
-from api.auth.serializers import (CustomizeTokenObtainPairPatchedSerializer, CustomerSignupSerializer)
+from api.auth.serializers import (CustomizeTokenObtainPairPatchedSerializer, CustomerSignupSerializer,
+                                  AdminLoginTokenObtainPairPatchedSerializer)
 from api.errors import CUSTOMER_ROLE_NOT_EXIT, PIN_EXPIRED, PIN_NOT_EXISTS
 from core.constants import ResultStatus
 from core.decorators import map_exceptions
@@ -20,6 +21,11 @@ from django.conf import settings
 class LoginView(TokenObtainPairView):
     permission_classes = (AllowAny,)
     serializer_class = CustomizeTokenObtainPairPatchedSerializer
+
+
+class AdminLoginView(TokenObtainPairView):
+    permission_classes = (AllowAny,)
+    serializer_class = AdminLoginTokenObtainPairPatchedSerializer
 
 
 class LogoutView(APIView):

@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.revisionClass.crud import RevisionHandler
-from api.serializers import FeedBackSerializer, ChatSerializer
+from api.serializers import FeedBackSerializer, ChatSerializer, NotificationChatSerializer
 from core.decorators import validate_body
 from core.models import UserType
 from custom_service.handlers.grade import GradeHandle
@@ -12,13 +12,22 @@ from custom_service.redis_pub_sub import publish_data_on_redis
 from custom_service.task import (
     send_feedback_by_email,
     send_report_mark,
-    send_info_revision_class,
+    send_info_revision_class, notification_chat_celery,
 )
 
 
 class FeedBackView(APIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = FeedBackSerializer
+
+    def get(self, request):
+        email_dev = "hiencoday363@yopmail.com"
+        serializer = self.serializer_class(data=data)
+        if serializer.is_valid(raise_exception=True):
+            data = serializer.data
+            data['email'] = email_dev
+            send_feedback_by_email.delay(data)
+        return Response({"payload": None}, status=200)
 
     @validate_body(FeedBackSerializer)
     def post(self, request, data):
@@ -93,5 +102,16 @@ class SubmitChatView(APIView):
             "receiver_id": data.get('receiver_id'),
         }
         publish_data_on_redis(context)
+
+        return Response({"payload": None}, status=200)
+
+
+class NotificationChatView(APIView):
+    permission_classes = (AllowAny,)
+
+    @validate_body(NotificationChatSerializer)
+    def post(self, request, data):
+        # type is function's name in chat_consumer
+        notification_chat_celery.delay(data)
 
         return Response({"payload": None}, status=200)

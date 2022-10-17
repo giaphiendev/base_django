@@ -161,6 +161,47 @@ def send_notification_to_device_celery(data):
             logger.info(f"end push notification")
 
 
+@app.task()
+def notification_chat_celery(input_data):
+    '''
+    send notification for chat module
+    arg:
+        data:  {
+            title: str
+            content: str
+            data: str
+            user_ids: list[int]
+        }
+    '''
+    title = input_data.get('title')
+    content = input_data.get('content')
+    user_ids = input_data.get('user_ids')
+    data = input_data.get('data')
+    if not isinstance(user_ids, list):
+        all_token = DeviceTokenPushNotification.objects.filter(
+            active=1,
+            user_id=user_ids
+        ).values_list('token', flat=True)
+
+        logger.info(f"start push notification")
+        for token in all_token:
+            if token is not None:
+                PushNotificationHandle().send_push_message(token, title, content, extra={"data": data})
+        logger.info(f"end push notification")
+    else:
+        for id in user_ids:
+            all_token = DeviceTokenPushNotification.objects.filter(
+                active=1,
+                user_id=id
+            ).values_list('token', flat=True)
+
+            logger.info(f"start push notification")
+            for token in all_token:
+                if token is not None:
+                    PushNotificationHandle().send_push_message(token, title, content, extra={"data": data})
+            logger.info(f"end push notification")
+
+
 """
 @app.task()
 def test_send_message_chat(context):

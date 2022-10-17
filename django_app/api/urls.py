@@ -23,6 +23,7 @@ from .views import (
     SendReportCardView,
     SendInfoRevisionClassView,
     SubmitChatView,
+    NotificationChatView,
 )
 
 app_name = "api"
@@ -78,5 +79,6 @@ urlpatterns = (
         re_path(r"^send-info-revision$", SendInfoRevisionClassView.as_view(), name="send_info_revision_class"),
         # api for submit chat
         re_path(r"^submit-chat$", SubmitChatView.as_view(), name="submit_chat"),
+        re_path(r"^noti-chat$", NotificationChatView.as_view(), name="notification_chat"),
     ]
 )
