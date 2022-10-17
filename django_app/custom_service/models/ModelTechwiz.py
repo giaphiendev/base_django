@@ -130,7 +130,7 @@ class RevisionClass(TimeStampMixin):
     time_end = models.DateTimeField(null=True, blank=True)
     status = models.BooleanField(default=1)
 
-    subject = models.OneToOneField(Subject, on_delete=models.SET_NULL, null=True, related_name="revision_class_subject")
+    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, related_name="revision_class_subject")
     teacher = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="revision_class_teacher")
 
     class Meta:

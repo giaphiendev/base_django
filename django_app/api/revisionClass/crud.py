@@ -1,6 +1,8 @@
 from custom_service.models.ModelTechwiz import Subject, User, RevisionClass, ClassTeacherSubject, TimeTable, Student
 from custom_service.exceptions import PostNotFound
 from django.db import transaction
+
+
 class RevisionHandler:
     def get_revision_by_teacher(self, teacher_id):
         #  list_revision
@@ -97,8 +99,8 @@ class RevisionHandler:
         """
         Create revision
         """
-        with transaction.atomic():
-            revision = RevisionClass.objects.create(**data)
+        revision = RevisionClass(**data)
+        revision.save()
 
         return revision
 

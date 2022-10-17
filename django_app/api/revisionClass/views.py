@@ -15,7 +15,6 @@ from .serializers import RevisionClassSerializer, PutTimeTableSerializer, GetRev
 from custom_service.task import send_notification_to_device_celery
 
 
-
 class GetRevision(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -74,6 +73,7 @@ class UpdateTimeTableView(APIView):
 
         return Response({'payload': None}, status=200)
 
+
 class GetListRevisonView(PaginationApiView):
     permission_classes = (AllowAny,)  # IsAuthenticated
 
@@ -94,7 +94,12 @@ class GetListRevisonView(PaginationApiView):
     def post(self, request):
         data = request.data
         data["subject"] = Subject.objects.filter(id=data.get('subject')).first()
-        data["teacher"] = User.objects.filter(id=data.get('teacher')).first()
+        teacher = User.objects.filter(id=data.get('teacher')).first()
+        if teacher.role != UserType.TEACHER:
+            return Response({
+                "error": "User has no permission!"
+            }, status=400)
+        data["teacher"] = teacher
         revision = RevisionHandler().create_revision(data)
         serializer = RevisionClassSerializer(revision).data
         data = {
@@ -102,10 +107,12 @@ class GetListRevisonView(PaginationApiView):
         }
         return Response(data, status=200)
 
+
 class DetailView(APIView):
     permission_classes = (AllowAny,)
     serializer_class = RevisionClassSerializer
     handler_class = RevisionHandler
+
     @map_exceptions(
         {
             PostNotFound: ERROR_POST_NOT_FOUND,
@@ -128,11 +135,12 @@ class DetailView(APIView):
         revision_id = kwargs.get("revision_id")
         self.handler_class().delete_revision(revision_id)
         return Response(
-                {
-                    'payload': None
-                },
-                status=204
-            )
+            {
+                'payload': None
+            },
+            status=204
+        )
+
     def put(self, request, revision_id):
         data = request.data
         data["subject"] = Subject.objects.filter(id=data.get('subject')).first()
