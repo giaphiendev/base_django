@@ -91,7 +91,7 @@ class GetListRevisonView(PaginationApiView):
         }
         return Response(data, status=200)
 
-    def post(self, request, data):
+    def post(self, request):
         data = request.data
         data["subject"] = Subject.objects.filter(id=data.get('subject')).first()
         data["teacher"] = User.objects.filter(id=data.get('teacher')).first()
