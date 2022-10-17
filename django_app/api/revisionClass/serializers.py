@@ -16,6 +16,7 @@ class GetRevisionClassSerializer(serializers.Serializer):
     info = serializers.SerializerMethodField()
 
     def get_info(self, instance):
+        id = instance.id
         time_start = instance.time_start
         time_end = instance.time_end
         status = instance.status
@@ -26,6 +27,7 @@ class GetRevisionClassSerializer(serializers.Serializer):
         teacher_first_name = instance.teacher.first_name
         teacher_last_name = instance.teacher.last_name
         return {
+            "id": id,
             "time_start": time_start,
             "time_end": time_end,
             "status": status,
